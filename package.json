@@ -45,7 +45,8 @@
     "mongodb": "^3.3.2",
     "odata-v4-mongodb": "^0.1.12",
     "odata-v4-server": "^0.2.13",
-    "patch-package": "^6.2.0"
+    "patch-package": "^6.2.0",
+    "ws": "^7.2.1"
   },
   "devDependencies": {
     "@types/event-stream": "^3.3.34",
