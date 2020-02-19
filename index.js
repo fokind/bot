@@ -1,7 +1,7 @@
 "use strict";
 
 require("dotenv").config();
- 
+
 const express = require("express");
 const { BotServer } = require("./lib/server");
 
@@ -10,13 +10,16 @@ require("express-ws")(app);
 
 const port = process.env.PORT;
 app.use(express.static("./webapp"));
-
+const botServer = new BotServer();
 app.use("/odata", BotServer.create());
 
 app.ws("/ws", ws => {
-    setInterval(() => {
-        ws.send("test");
-    }, 1000);
+  // по подписке на событие новых данных выдавать новые данные на фронт
+  botServer.on("time", e => {
+    ws.send(e);
+  });
+
+  botServer.start();
 });
 
 app.listen(port, () => {
