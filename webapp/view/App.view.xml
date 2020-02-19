@@ -1,0 +1,11 @@
+<mvc:View xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+	displayBlock="true">
+	<App>
+		<Page title="Bot">
+			<List items="{/messages}">
+				<StandardListItem title="{message}"/>
+			</List>
+		</Page>
+	</App>
+</mvc:View>
