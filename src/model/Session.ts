@@ -105,6 +105,14 @@ export class Session {
         eventBus.emit("ticker", ticker);
     });
     
+    service.on("candles", async candles => {
+        // UNDONE существующие при этом заменить
+        await db.collection("candles").insertMany(candles.map(e => Object.assign(e, {
+          parentId: _id  
+        }).toArray());
+        eventBus.emit("candles", candles);
+    });
+    
     await service.start();
   }
 

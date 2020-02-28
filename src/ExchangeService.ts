@@ -25,7 +25,7 @@ constructor(data: any) {
     Object.assign(this, data);
   }
   
-  public start(): Promise<void> {
+  public startTicker(){
       let tickerStream = ExchangeService._tickerStreams[this.sessionId];
       if (!tickerStream) {
     const tickerStream = liveTicker({
@@ -38,6 +38,26 @@ constructor(data: any) {
         this.emit("ticker", chunk);
     });
       }
+  }
+ 
+  public startCandles() {
+      let candlesStream = ExchangeService._candlesStream[this.sessionId];
+      if (!candlesStream) {
+    const candlesStream = liveCandles({
+        exchange,
+        currency,
+        asset
+    });
+          ExchangeService._candlesStream[this.sessionId] = candlesStream;
+    candlesStream.on("data", chunk => {
+        this.emit("candles", chunk);
+    });
+      }
+  }
+ 
+  public start() {
+      this.startTicker();
+      this.startCandles();
   }
  
   public async stop(): Promise<void> {
