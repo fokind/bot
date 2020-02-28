@@ -5,9 +5,9 @@ import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
 import { streamBuffer, streamTradesBacktest, streamTradesPaper } from "trader-service";
 import connect from "../connect";
-import { Candle } from "../models/Candle";
-import { Session } from "../models/Session";
-import { Ticker } from "../models/Ticker";
+import { Candle } from "../model/Candle";
+import { Session } from "../model/Session";
+import { Ticker } from "../model/Ticker";
 
 const collectionName = "session";
 

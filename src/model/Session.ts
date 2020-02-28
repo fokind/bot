@@ -5,6 +5,7 @@ import connect from "../connect";
 import { Candle } from "./Candle";
 // import { Trade } from "./Trade";
 import { Ticker } from "./Ticker";
+import { ExchangeService } from "../service";
 
 export class Session {
   @Edm.Key
@@ -67,33 +68,57 @@ export class Session {
 
   @Edm.Action
   public async start(@odata.result result: any): Promise<void> {
+      const begin = moment.utc()
+            .toISOString()
     const _id = new ObjectID(result._id);
-    await (await connect()).collection("session").updateOne(
+    const db = await connect();
+    const collectionSession = db.collection("session");
+    await collectionSession.updateOne(
       { _id },
       {
         $set: {
-          begin: moment()
-            .utc()
-            .toISOString()
-        }
+          begin
       }
     );
     
-    // создать сервис
-    // добавить в репозиторий
-    // подписаться на его события, по которым должно происходить сохранение в базу данных
+    const {
+        exchange,
+        currency,
+        asset,
+        period
+    } = await collectionSession.findOne({ _id });
+
+    const service = new ExchangeService({
+        exchange,
+        currency,
+        asset,
+        period
+    });
+    
+    service.on("ticker", async ticker => {
+        ticker.parentId = _id;
+        await db.collection("ticker").updateOne({
+          parentId: _id
+        }, ticker, { upsert: true }));
+    });
+    
+    await service.start();
   }
 
   @Edm.Action
   public async stop(@odata.result result: any): Promise<void> {
+    const service = ExchangeService.getInstance(result._id);
+    await service.stop();
+    const end = moment
+            .utc()
+            .toISOString();
     const _id = new ObjectID(result._id);
+    
     await (await connect()).collection("session").updateOne(
       { _id },
       {
         $set: {
-          end: moment()
-            .utc()
-            .toISOString()
+          end
         }
       }
     );
