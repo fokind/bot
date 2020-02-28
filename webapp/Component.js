@@ -18,23 +18,20 @@ sap.ui.define(["sap/ui/core/UIComponent", "sap/ui/core/ws/WebSocket", "sap/ui/De
         messages: []
       });
 
-      var ws = new WebSocket("/ws"); // UNDONE здесь должен быть адрес
+      var ws = new WebSocket("/ws");
       ws.attachMessage(function(oEvent) {
         var aMessages = oModel.getProperty("/messages");
         var oMessage = JSON.parse(oEvent.getParameter("data"));
-        switch (oMessage.path) {
-            case "Ticker":
+        switch (oMessage.name) {
+            case "ticker":
                 oModel.setProperty("/Ticker", oMessage.data);
                 break;
-            case "Candles":
+            case "candles":
                 var aCandles = oModel.getProperty("Candles");
                 aCandles.push(oMessage.data);
+                oModel.refresh();
         }
-        aMessages.push({
-          message: sMessage
-        });
-        oModel.refresh();
-      });
+  });
     },
     
     getContentDensityClass: function() {

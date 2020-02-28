@@ -17,7 +17,10 @@ const eventBus = BotServer.getEventBus();
 
 app.ws("/ws", ws => {
   eventBus.on("ticker", e => {
-    ws.send(e); // проверить, что клиент доступен
+    ws.send(JSON.stringify({
+        name: "ticker",
+        data: e
+    })); // проверить, что клиент доступен
   });
 
   botServer.start();
