@@ -1,9 +1,6 @@
-import es from "event-stream";
-import moment from "moment";
 import { ObjectID } from "mongodb";
 import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
-import { streamBuffer, streamTradesBacktest, streamTradesPaper } from "trader-service";
 import connect from "../connect";
 import { Candle } from "../model/Candle";
 import { Session } from "../model/Session";
@@ -59,15 +56,11 @@ export class SessionController extends ODataController {
     @odata.query query: ODataQuery
   ): Promise<Session> {
     const { projection } = createQuery(query);
-    // tslint:disable-next-line: variable-name
     const _id = new ObjectID(key);
     const db = await connect();
     const session = new Session(
       await db.collection(collectionName).findOne({ _id }, { projection })
     );
-    // session.status = Session.streams[session._id.toHexString()]
-    //   ? "active"
-    //   : "inactive";
     return session;
   }
 
@@ -82,19 +75,26 @@ export class SessionController extends ODataController {
     session._id = (await collection.insertOne(session)).insertedId;
     return session;
   }
-  
+
   @odata.PATCH
-  async patch(@odata.key key: string, @odata.body delta: any): Promise<number> {
+  public async patch(
+    @odata.key key: string,
+    @odata.body delta: any
+  ): Promise<number> {
     const db = await connect();
-    if (delta._id) delete delta._id;
-    // tslint:disable-next-line: variable-name
+    if (delta._id) {
+      delete delta._id;
+    }
+
     const _id = new ObjectID(key);
-    return await db.collection(collectionName).updateOne({ _id }, { $set: delta }).then(result => result.modifiedCount);
+    return await db
+      .collection(collectionName)
+      .updateOne({ _id }, { $set: delta })
+      .then(result => result.modifiedCount);
   }
 
   @odata.DELETE
   public async remove(@odata.key key: string): Promise<number> {
-    // tslint:disable-next-line: variable-name
     const _id = new ObjectID(key);
     return (await connect())
       .collection(collectionName)
@@ -104,7 +104,7 @@ export class SessionController extends ODataController {
 
   @odata.GET("Candles")
   public async getCandles(
-    @odata.result result: Session,
+    @odata.result result: any,
     @odata.query query: ODataQuery
   ): Promise<Candle[]> {
     const db = await connect();
@@ -129,10 +129,10 @@ export class SessionController extends ODataController {
     }
     return items;
   }
-  
+
   @odata.GET("Ticker")
   public async getTicker(
-    @odata.result result: Session,
+    @odata.result result: any,
     @odata.query query: ODataQuery
   ): Promise<Ticker> {
     const db = await connect();
@@ -140,24 +140,6 @@ export class SessionController extends ODataController {
     const parentId = new ObjectID(result._id);
     const { projection } = createQuery(query);
 
-    return new Ticker(
-      await collection.findOne({ parentId }, { projection })
-    );
+    return new Ticker(await collection.findOne({ parentId }, { projection }));
   }
-  
-// нет ситуации в которой пользователь будет постить
-//   @odata.POST
-//   public async postTicker(@odata.result result: Session, @odata.body body: any): Promise<number> {
-//     const ticker = new Ticker(body);
-//     if (body._id) {
-//         ticker._id = new ObjectID(body._id);
-//     }
-//     const parentId = new ObjectID(result._id);
-//     ticker.parentId = parentId;
-    
-//     const db = await connect();
-//     const collection = db.collection("ticker");
-
-//     return await collection.updateOne({ parentId }, ticker, { upsert: true }).then(result => result.modifiedCount);
-//   }
 }

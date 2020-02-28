@@ -1,16 +1,15 @@
-import es from "event-stream";
 import { EventEmitter } from "events";
-import WebSocket from "ws";
-import { liveTicker, liveCandles } from "exchange-service";
-import { ObjectID } from "mongodb";
-
-// export declare interface Service {
-//     on(event: 'ticker', listener: (name: string) => void): this;
-//     on(event: 'candles', listener: (name: string) => void): this;
-//     on(event: string, listener: Function): this;
-// }
+import { ICandle, ITicker, liveCandles, liveTicker } from "exchange-service";
 
 export class ExchangeService extends EventEmitter {
+  public static async stop(sessionId: string): Promise<void> {
+    const tickerStream = ExchangeService._tickerStreams[sessionId];
+    delete ExchangeService._tickerStreams[sessionId];
+    return new Promise(resolve => {
+      tickerStream.on("close", resolve);
+      tickerStream.destroy();
+    });
+  }
   private static _tickerStreams: any = {};
   private static _candlesStreams: any = {};
 
@@ -20,52 +19,50 @@ export class ExchangeService extends EventEmitter {
   public asset: string;
   public period: number;
 
-constructor(data: any) {
-    super(data);
+  constructor(data: any) {
+    super();
     Object.assign(this, data);
   }
-  
-  public startTicker(){
-      let tickerStream = ExchangeService._tickerStreams[this.sessionId];
-      if (!tickerStream) {
-    const tickerStream = liveTicker({
+
+  public startTicker() {
+    const { exchange, currency, asset } = this;
+    let tickerStream = ExchangeService._tickerStreams[this.sessionId];
+    if (!tickerStream) {
+      tickerStream = liveTicker({
         exchange,
         currency,
         asset
-    });
-          ExchangeService._tickerStreams[this.sessionId] = tickerStream;
-    tickerStream.on("data", chunk => {
-        this.emit("ticker", chunk);
-    });
-      }
-  }
- 
-  public startCandles() {
-      let candlesStream = ExchangeService._candlesStream[this.sessionId];
-      if (!candlesStream) {
-    const candlesStream = liveCandles({
-        exchange,
-        currency,
-        asset
-    });
-          ExchangeService._candlesStream[this.sessionId] = candlesStream;
-    candlesStream.on("data", chunk => {
-        this.emit("candles", chunk);
-    });
-      }
-  }
- 
-  public start() {
-      this.startTicker();
-      this.startCandles();
-  }
- 
-  public async stop(): Promise<void> {
-      let tickerStream = ExchangeService._tickerStreams[this.sessionId];
-          delete ExchangeService._tickerStreams[this.sessionId];
-      return new Promise(resolve => {
-          tickerStream.on("close", resolve);
-          tickerStream.destroy();
       });
+      ExchangeService._tickerStreams[this.sessionId] = tickerStream;
+      tickerStream.on("data", (ticker: ITicker) => {
+        this.emit("ticker", ticker);
+      });
+    }
+  }
+
+  public startCandles() {
+    const { exchange, currency, asset, period } = this;
+    let candlesStream = ExchangeService._candlesStreams[this.sessionId];
+    if (!candlesStream) {
+      candlesStream = liveCandles({
+        exchange,
+        currency,
+        asset,
+        period
+      });
+      ExchangeService._candlesStreams[this.sessionId] = candlesStream;
+      candlesStream.on("data", (candles: ICandle[]) => {
+        this.emit("candles", candles);
+      });
+    }
+  }
+
+  public start() {
+    this.startTicker();
+    this.startCandles();
+  }
+
+  public async stop(): Promise<void> {
+    return ExchangeService.stop(this.sessionId);
   }
 }

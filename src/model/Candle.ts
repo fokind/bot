@@ -5,7 +5,6 @@ export class Candle {
   @Edm.Key
   @Edm.Computed
   @Edm.String
-  // tslint:disable-next-line: variable-name
   public _id: ObjectID;
 
   @Edm.String

@@ -4,7 +4,6 @@ import { Edm } from "odata-v4-server";
 export class Ticker {
   @Edm.Computed
   @Edm.String
-  // tslint:disable-next-line: variable-name
   public _id: ObjectID;
 
   @Edm.Key

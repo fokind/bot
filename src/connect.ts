@@ -7,7 +7,10 @@ export default async function(): Promise<Db> {
   const dbName = process.env.MONGODB_DBNAME;
 
   if (!connect) {
-    connect = await MongoClient.connect(uri, { useNewUrlParser: true });
+    connect = await MongoClient.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
   }
   if (!connect.isConnected()) {
     await connect.connect();

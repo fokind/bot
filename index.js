@@ -12,8 +12,7 @@ const port = process.env.PORT;
 app.use(express.static("./webapp"));
 app.use("/odata", BotServer.create());
 
-const botServer = new BotServer();
-const eventBus = BotServer.getEventBus();
+const eventBus = BotServer.eventBus;
 
 app.ws("/ws", ws => {
   eventBus.on("ticker", e => {
@@ -22,8 +21,12 @@ app.ws("/ws", ws => {
         data: e
     })); // проверить, что клиент доступен
   });
-
-  botServer.start();
+  eventBus.on("candles", e => {
+    ws.send(JSON.stringify({
+        name: "candles",
+        data: e
+    }));
+  });
 });
 
 app.listen(port, () => {

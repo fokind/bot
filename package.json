@@ -39,6 +39,7 @@
   "dependencies": {
     "dotenv": "^8.1.0",
     "event-stream": "^4.0.1",
+    "exchange-service": "^1.0.1-alpha2",
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
     "moment": "^2.24.0",
