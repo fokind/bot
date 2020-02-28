@@ -2,7 +2,7 @@ import { EventEmitter } from "events";
 import { ICandle, ITicker, liveCandles, liveTicker } from "exchange-service";
 
 export class ExchangeService extends EventEmitter {
-  public static async stop(sessionId: string): Promise<void> {
+  public static async stopTicker(sessionId: string): Promise<void> {
     const tickerStream = ExchangeService._tickerStreams[sessionId];
     delete ExchangeService._tickerStreams[sessionId];
     return new Promise(resolve => {
@@ -10,6 +10,23 @@ export class ExchangeService extends EventEmitter {
       tickerStream.destroy();
     });
   }
+
+  public static async stopCandles(sessionId: string): Promise<void> {
+    const candlesStreams = ExchangeService._candlesStreams[sessionId];
+    delete ExchangeService._candlesStreams[sessionId];
+    return new Promise(resolve => {
+      candlesStreams.on("close", resolve);
+      candlesStreams.destroy();
+    });
+  }
+
+  public static async stop(sessionId: string): Promise<[void, void]> {
+    return Promise.all([
+      ExchangeService.stopTicker(sessionId),
+      ExchangeService.stopCandles(sessionId)
+    ]);
+  }
+
   private static _tickerStreams: any = {};
   private static _candlesStreams: any = {};
 
