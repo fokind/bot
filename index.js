@@ -13,10 +13,10 @@ app.use(express.static("./webapp"));
 app.use("/odata", BotServer.create());
 
 const botServer = new BotServer();
-const eventEmitter = BotServer.eventEmitter;
+const eventBus = BotServer.getEventBus();
 
 app.ws("/ws", ws => {
-  eventEmitter.on("ticker", e => {
+  eventBus.on("ticker", e => {
     ws.send(e); // проверить, что клиент доступен
   });
 

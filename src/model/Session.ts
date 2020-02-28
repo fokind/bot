@@ -6,6 +6,7 @@ import { Candle } from "./Candle";
 // import { Trade } from "./Trade";
 import { Ticker } from "./Ticker";
 import { ExchangeService } from "../service";
+import { BotServer } from "../server";
 
 export class Session {
   @Edm.Key
@@ -69,7 +70,8 @@ export class Session {
   @Edm.Action
   public async start(@odata.result result: any): Promise<void> {
       const begin = moment.utc()
-            .toISOString()
+            .toISOString();
+           const eventBus = BotServer.getEventBus();
     const _id = new ObjectID(result._id);
     const db = await connect();
     const collectionSession = db.collection("session");
@@ -100,6 +102,7 @@ export class Session {
         await db.collection("ticker").updateOne({
           parentId: _id
         }, ticker, { upsert: true }));
+        eventBus.emit("ticker", ticker);
     });
     
     await service.start();

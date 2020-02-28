@@ -21,6 +21,7 @@ export class ExchangeService extends EventEmitter {
   public period: number;
 
 constructor(data: any) {
+    super(data);
     Object.assign(this, data);
   }
   
