@@ -107,15 +107,35 @@ export class SessionController extends ODataController {
     @odata.result result: any,
     @odata.query query: ODataQuery
   ): Promise<Candle[]> {
+    const {
+      exchange,
+      currency,
+      asset,
+      period
+    }: {
+      exchange: string;
+      currency: string;
+      asset: string;
+      period: number;
+    } = result;
     const db = await connect();
     const collection = db.collection("candle");
     const mongodbQuery = createQuery(query);
-    const parentId = new ObjectID(result._id);
     const items: any =
       typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
         ? []
         : await collection
-            .find({ $and: [{ parentId }, mongodbQuery.query] })
+            .find({
+              $and: [
+                {
+                  exchange,
+                  currency,
+                  asset,
+                  period
+                },
+                mongodbQuery.query
+              ]
+            })
             .project(mongodbQuery.projection)
             .skip(mongodbQuery.skip || 0)
             .limit(mongodbQuery.limit || 0)
@@ -123,7 +143,17 @@ export class SessionController extends ODataController {
             .toArray();
     if (mongodbQuery.inlinecount) {
       items.inlinecount = await collection
-        .find({ $and: [{ parentId }, mongodbQuery.query] })
+        .find({
+          $and: [
+            {
+              exchange,
+              currency,
+              asset,
+              period
+            },
+            mongodbQuery.query
+          ]
+        })
         .project(mongodbQuery.projection)
         .count(false);
     }
@@ -135,11 +165,28 @@ export class SessionController extends ODataController {
     @odata.result result: any,
     @odata.query query: ODataQuery
   ): Promise<Ticker> {
+    const {
+      exchange,
+      currency,
+      asset
+    }: {
+      exchange: string;
+      currency: string;
+      asset: string;
+    } = result;
     const db = await connect();
     const collection = db.collection("ticker");
-    const parentId = new ObjectID(result._id);
     const { projection } = createQuery(query);
 
-    return new Ticker(await collection.findOne({ parentId }, { projection }));
+    return new Ticker(
+      await collection.findOne(
+        {
+          exchange,
+          currency,
+          asset
+        },
+        { projection }
+      )
+    );
   }
 }

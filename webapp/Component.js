@@ -22,21 +22,18 @@ sap.ui.define(
             case "ticker":
               oModel.setProperty("/Ticker", oMessage.data);
               break;
-            case "candles":
+            case "candle":
               var aCandles = oModel.getProperty("/Candles");
               var iLength = aCandles.length;
-              var aData = oMessage.data;
-              for (var i = 0; i < aData.length; i++) {
-                var oData = aData[i];
-                var oCandle = aCandles.filter(function(e) {
-                  return e.time === oData.time;
-                })[0];
-                if (oCandle) {
-                  var iIndex = aCandles.indexOf(oCandle);
-                  oModel.setProperty("/Candles/" + iIndex, oData);
-                } else {
-                  oModel.setProperty("/Candles/" + iLength++, oData);
-                }
+              var oData = oMessage.data;
+              var oCandle = aCandles.filter(function(e) {
+                return e.time === oData.time;
+              })[0];
+              if (oCandle) {
+                var iIndex = aCandles.indexOf(oCandle);
+                oModel.setProperty("/Candles/" + iIndex, oData);
+              } else {
+                oModel.setProperty("/Candles/" + iLength++, oData);
               }
           }
         });

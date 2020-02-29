@@ -74,10 +74,16 @@ export class Session {
     });
 
     service.on("ticker", async ticker => {
-      ticker.parentId = _id;
+      ticker = Object.assign(ticker, {
+        exchange,
+        currency,
+        asset
+      });
       await db.collection("ticker").updateOne(
         {
-          parentId: _id
+          exchange,
+          currency,
+          asset
         },
         { $set: ticker },
         { upsert: true }
@@ -86,15 +92,26 @@ export class Session {
     });
 
     service.on("candles", async (candles: ICandle[]) => {
-      // UNDONE существующие при этом заменить
-      await db.collection("candle").insertMany(
-        candles.map(e =>
-          Object.assign(e, {
-            parentId: _id
-          })
-        )
-      );
-      eventBus.emit("candles", candles);
+      candles.forEach(async candle => {
+        candle = Object.assign(candle, {
+          exchange,
+          currency,
+          asset,
+          period
+        });
+        await db.collection("candle").updateOne(
+          {
+            exchange,
+            currency,
+            asset,
+            period,
+            time: candle.time
+          },
+          { $set: candle },
+          { upsert: true }
+        );
+        eventBus.emit("candle", candle);
+      });
     });
 
     await service.start();
