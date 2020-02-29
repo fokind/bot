@@ -16,16 +16,24 @@ const eventBus = BotServer.eventBus;
 
 app.ws("/ws", ws => {
   eventBus.on("ticker", e => {
-    ws.send(JSON.stringify({
+    try {
+      ws.send(JSON.stringify({
         name: "ticker",
         data: e
-    })); // проверить, что клиент доступен
+      })); // проверить, что клиент доступен
+    } catch (error) {
+      console.log(error);
+    }
   });
   eventBus.on("candles", e => {
-    ws.send(JSON.stringify({
+    try {
+      ws.send(JSON.stringify({
         name: "candles",
         data: e
-    }));
+      }));
+    } catch (error) {
+      console.log(error);
+    }
   });
 });
 

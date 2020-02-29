@@ -78,8 +78,4 @@ export class ExchangeService extends EventEmitter {
     this.startTicker();
     this.startCandles();
   }
-
-  public async stop(): Promise<void> {
-    return ExchangeService.stop(this.sessionId);
-  }
 }
