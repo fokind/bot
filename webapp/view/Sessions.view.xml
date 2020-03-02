@@ -1,0 +1,59 @@
+<mvc:View controllerName="fokind.bot.controller.Sessions" 
+	xmlns:mvc="sap.ui.core.mvc" 
+	xmlns="sap.ui.table" 
+	xmlns:m="sap.m">
+	<m:Page title="Sessions" 
+		enableScrolling="false" 
+		showHeader="true">
+        <m:headerContent>
+          <m:Button
+            text="Add" 
+            press="onAddPress"/>
+        </m:headerContent>
+		<m:content>
+			<Table rows="{data>/Session}" 
+				selectionMode="Single" 
+				selectionBehavior="RowOnly" 
+				visibleRowCountMode="Auto" 
+				rowSelectionChange="onRowSelectionChange">
+				<columns>
+					<Column>
+						<m:Label text="Currency" />
+						<template>
+							<m:Text text="{data>currency}" 
+								wrapping="false"/>
+						</template>
+					</Column>
+					<Column>
+						<m:Label text="Asset" />
+						<template>
+							<m:Text text="{data>asset}" 
+								wrapping="false"/>
+						</template>
+					</Column>
+					<Column>
+						<m:Label text="Period" />
+						<template>
+							<m:Text text="{period}" 
+								wrapping="false"/>
+						</template>
+					</Column>
+					<Column>
+						<m:Label text="Begin" />
+						<template>
+							<m:Text text="{data>begin}" 
+								wrapping="false"/>
+						</template>
+					</Column>
+					<Column>
+						<m:Label text="End" />
+						<template>
+							<m:Text text="{data>end}" 
+								wrapping="false"/>
+						</template>
+					</Column>
+				</columns>
+			</Table>
+		</m:content>
+	</m:Page>
+</mvc:View>

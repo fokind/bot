@@ -1,6 +1,7 @@
 sap.ui.define(
-  ["sap/ui/core/UIComponent", "sap/ui/core/ws/WebSocket", "sap/ui/Device"],
-  function(UIComponent, WebSocket, Device) {
+  ["sap/ui/core/UIComponent", "sap/ui/core/ws/WebSocket", "sap/ui/Device",
+    "sap/ui/core/EventBus"],
+  function(UIComponent, WebSocket, Device, EventBus) {
     "use strict";
 
     return UIComponent.extend("fokind.bot.Component", {
@@ -10,10 +11,14 @@ sap.ui.define(
 
       init: function() {
         UIComponent.prototype.init.apply(this, arguments);
-        var oModel = this.getModel();
+        
+        var oModel = this.getModel("local");
         oModel.setData({
+            Ticker: {},
           Candles: []
         });
+        
+        // TODO перенести в model
 
         var ws = new WebSocket("/ws");
         ws.attachMessage(function(oEvent) {

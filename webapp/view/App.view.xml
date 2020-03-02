@@ -1,68 +1,6 @@
 <mvc:View controllerName="fokind.bot.controller.App" 
 	xmlns:mvc="sap.ui.core.mvc" 
 	xmlns="sap.m" 
-	xmlns:l="sap.ui.layout" 
-	xmlns:form="sap.ui.layout.form" 
 	displayBlock="true">
-	<App id="app">
-		<Page title="Bot">
-			<l:BlockLayout>
-				<l:BlockLayoutRow>
-					<l:BlockLayoutCell title="Ticker">
-						<form:SimpleForm>
-							<Label text="Ask"/>
-							<Text text="{/Ticker/ask}" />
-							<Label text="Bid"/>
-							<Text text="{/Ticker/bid}" />
-						</form:SimpleForm>
-					</l:BlockLayoutCell>
-					<l:BlockLayoutCell title="Candles" 
-						width="3">
-						<Table growing="true"
-							growingThreshold="10"
-							items="{
-								path: '/Candles',
-								sorter: {
-									path: 'time', 
-									descending: true
-								}
-							}">
-							<columns>
-								<Column>
-									<Text text="Time" />
-								</Column>
-								<Column hAlign="End">
-									<Text text="Open" />
-								</Column>
-								<Column hAlign="End">
-									<Text text="High" />
-								</Column>
-								<Column hAlign="End">
-									<Text text="Low" />
-								</Column>
-								<Column hAlign="End">
-									<Text text="Close" />
-								</Column>
-								<Column hAlign="End">
-									<Text text="Volume" />
-								</Column>
-							</columns>
-							<items>
-								<ColumnListItem>
-									<cells>
-										<Text text="{time}"/>
-										<Text text="{open}"/>
-										<Text text="{high}"/>
-										<Text text="{low}"/>
-										<Text text="{close}"/>
-										<Text text="{volume}"/>
-									</cells>
-								</ColumnListItem>
-							</items>
-						</Table>
-					</l:BlockLayoutCell>
-				</l:BlockLayoutRow>
-			</l:BlockLayout>
-		</Page>
-	</App>
+	<App id="app"/>
 </mvc:View>
