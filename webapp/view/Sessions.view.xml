@@ -5,11 +5,10 @@
 	<m:Page title="Sessions" 
 		enableScrolling="false" 
 		showHeader="true">
-        <m:headerContent>
-          <m:Button
-            text="Add" 
-            press="onAddPress"/>
-        </m:headerContent>
+		<m:headerContent>
+			<m:Button text="Add" 
+				press="onAddPress"/>
+		</m:headerContent>
 		<m:content>
 			<Table rows="{data>/Session}" 
 				selectionMode="Single" 

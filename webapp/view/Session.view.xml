@@ -10,104 +10,103 @@
     navButtonPress="onBackPress" 
     showHeader="true">
     <headerContent>
-      <Button
-        icon="sap-icon://start" 
+      <Button icon="sap-icon://start" 
         text="Start" 
         press="onStartPress"/>
-      <Button
-        icon="sap-icon://stop" 
+      <Button icon="sap-icon://stop" 
         text="Stop" 
         press="onStopPress"/>
     </headerContent>
     <l:ResponsiveSplitter>
       <l:PaneContainer>
-          <l:PaneContainer>
-            <l:SplitPane>
-              <form:Form editable="false">
-                <form:layout>
-                  <form:ResponsiveGridLayout labelSpanXL="2" 
-                    labelSpanL="2" 
-                    labelSpanM="3" 
-                    labelSpanS="6" 
-                    adjustLabelSpan="false" 
-                    emptySpanXL="0" 
-                    emptySpanL="0" 
-                    emptySpanM="0" 
-                    emptySpanS="0" 
-                    columnsXL="12" 
-                    columnsL="6" 
-                    columnsM="4"/>
-                </form:layout>
-                <form:formContainers>
-                  <form:FormContainer>
-                    <form:formElements>
-                      <form:FormElement label="Exchange">
-                        <Text text="{local>/exchange}">
-                          <layoutData>
-                            <l:GridData span="XL2 L2 M3 S6"/>
-                          </layoutData>
-                        </Text>
-                      </form:FormElement>
-                      <form:FormElement label="Currency">
-                        <Text text="{local>/currency}">
-                          <layoutData>
-                            <l:GridData span="XL2 L2 M3 S6"/>
-                          </layoutData>
-                        </Text>
-                      </form:FormElement>
-                      <form:FormElement label="Asset">
-                        <Text text="{local>/asset}">
-                          <layoutData>
-                            <l:GridData span="XL2 L2 M3 S6"/>
-                          </layoutData>
-                        </Text>
-                      </form:FormElement>
-                      <form:FormElement label="Period">
-                        <Text text="{local>/period}">
-                          <layoutData>
-                            <l:GridData span="XL2 L2 M3 S6"/>
-                          </layoutData>
-                        </Text>
-                      </form:FormElement>
-                      <form:FormElement label="Start">
-                        <Text text="{local>/begin}">
-                          <layoutData>
-                            <l:GridData span="XL2 L2 M3 S6"/>
-                          </layoutData>
-                        </Text>
-                      </form:FormElement>
-                      <form:FormElement label="End">
-                        <Text text="{local>/end}">
-                          <layoutData>
-                            <l:GridData span="XL2 L2 M3 S6"/>
-                          </layoutData>
-                        </Text>
-                      </form:FormElement>
-                      <form:FormElement label="Ask">
-                        <Text text="{local>/Ticker/ask}">
-                          <layoutData>
-                            <l:GridData span="XL2 L2 M3 S6"/>
-                          </layoutData>
-                        </Text>
-                      </form:FormElement>
-                      <form:FormElement label="Bid">
-                        <Text text="{local>/Ticker/bid}">
-                          <layoutData>
-                            <l:GridData span="XL2 L2 M3 S6"/>
-                          </layoutData>
-                        </Text>
-                      </form:FormElement>
-                    </form:formElements>
-                  </form:FormContainer>
-                </form:formContainers>
-              </form:Form>
-            </l:SplitPane>
-          </l:PaneContainer>
-          <l:PaneContainer>
-            <l:SplitPane>
-                <Table id="candles" growing="true"
-							growingThreshold="10"
-							items="{
+        <l:PaneContainer>
+          <l:SplitPane>
+            <form:Form editable="false">
+              <form:layout>
+                <form:ResponsiveGridLayout labelSpanXL="2" 
+                  labelSpanL="2" 
+                  labelSpanM="3" 
+                  labelSpanS="6" 
+                  adjustLabelSpan="false" 
+                  emptySpanXL="0" 
+                  emptySpanL="0" 
+                  emptySpanM="0" 
+                  emptySpanS="0" 
+                  columnsXL="12" 
+                  columnsL="6" 
+                  columnsM="4"/>
+              </form:layout>
+              <form:formContainers>
+                <form:FormContainer>
+                  <form:formElements>
+                    <form:FormElement label="Exchange">
+                      <Text text="{local>/exchange}">
+                        <layoutData>
+                          <l:GridData span="XL2 L2 M3 S6"/>
+                        </layoutData>
+                      </Text>
+                    </form:FormElement>
+                    <form:FormElement label="Currency">
+                      <Text text="{local>/currency}">
+                        <layoutData>
+                          <l:GridData span="XL2 L2 M3 S6"/>
+                        </layoutData>
+                      </Text>
+                    </form:FormElement>
+                    <form:FormElement label="Asset">
+                      <Text text="{local>/asset}">
+                        <layoutData>
+                          <l:GridData span="XL2 L2 M3 S6"/>
+                        </layoutData>
+                      </Text>
+                    </form:FormElement>
+                    <form:FormElement label="Period">
+                      <Text text="{local>/period}">
+                        <layoutData>
+                          <l:GridData span="XL2 L2 M3 S6"/>
+                        </layoutData>
+                      </Text>
+                    </form:FormElement>
+                    <form:FormElement label="Start">
+                      <Text text="{local>/begin}">
+                        <layoutData>
+                          <l:GridData span="XL2 L2 M3 S6"/>
+                        </layoutData>
+                      </Text>
+                    </form:FormElement>
+                    <form:FormElement label="End">
+                      <Text text="{local>/end}">
+                        <layoutData>
+                          <l:GridData span="XL2 L2 M3 S6"/>
+                        </layoutData>
+                      </Text>
+                    </form:FormElement>
+                    <form:FormElement label="Ask">
+                      <Text text="{local>/Ticker/ask}">
+                        <layoutData>
+                          <l:GridData span="XL2 L2 M3 S6"/>
+                        </layoutData>
+                      </Text>
+                    </form:FormElement>
+                    <form:FormElement label="Bid">
+                      <Text text="{local>/Ticker/bid}">
+                        <layoutData>
+                          <l:GridData span="XL2 L2 M3 S6"/>
+                        </layoutData>
+                      </Text>
+                    </form:FormElement>
+                  </form:formElements>
+                </form:FormContainer>
+              </form:formContainers>
+            </form:Form>
+          </l:SplitPane>
+        </l:PaneContainer>
+        <l:PaneContainer>
+          <l:SplitPane>
+            <Table id="candles" 
+              growing="true" 
+              growingThreshold="10" 
+              items="{
 							    model: 'local',
 								path: '/Candles',
 								sorter: {
@@ -115,41 +114,41 @@
 									descending: true
 								}
 							}">
-							<columns>
-								<Column>
-									<Text text="Time" />
-								</Column>
-								<Column hAlign="End">
-									<Text text="Open" />
-								</Column>
-								<Column hAlign="End">
-									<Text text="High" />
-								</Column>
-								<Column hAlign="End">
-									<Text text="Low" />
-								</Column>
-								<Column hAlign="End">
-									<Text text="Close" />
-								</Column>
-								<Column hAlign="End">
-									<Text text="Volume" />
-								</Column>
-							</columns>
-							<items>
-								<ColumnListItem>
-									<cells>
-										<Text text="{local>time}"/>
-										<Text text="{local>open}"/>
-										<Text text="{local>high}"/>
-										<Text text="{local>low}"/>
-										<Text text="{local>close}"/>
-										<Text text="{local>volume}"/>
-									</cells>
-								</ColumnListItem>
-							</items>
-						</Table>
-            </l:SplitPane>
-          </l:PaneContainer>
+              <columns>
+                <Column>
+                  <Text text="Time" />
+                </Column>
+                <Column hAlign="End">
+                  <Text text="Open" />
+                </Column>
+                <Column hAlign="End">
+                  <Text text="High" />
+                </Column>
+                <Column hAlign="End">
+                  <Text text="Low" />
+                </Column>
+                <Column hAlign="End">
+                  <Text text="Close" />
+                </Column>
+                <Column hAlign="End">
+                  <Text text="Volume" />
+                </Column>
+              </columns>
+              <items>
+                <ColumnListItem>
+                  <cells>
+                    <Text text="{local>time}"/>
+                    <Text text="{local>open}"/>
+                    <Text text="{local>high}"/>
+                    <Text text="{local>low}"/>
+                    <Text text="{local>close}"/>
+                    <Text text="{local>volume}"/>
+                  </cells>
+                </ColumnListItem>
+              </items>
+            </Table>
+          </l:SplitPane>
+        </l:PaneContainer>
       </l:PaneContainer>
     </l:ResponsiveSplitter>
   </Page>

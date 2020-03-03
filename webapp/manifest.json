@@ -1,10 +1,10 @@
 {
-	"sap.app": {
-		"id": "fokind.bot",
-		"type": "application",
-		"applicationVersion": {
-			"version": "1.0.0"
-		},
+  "sap.app": {
+    "id": "fokind.bot",
+    "type": "application",
+    "applicationVersion": {
+      "version": "1.0.0"
+    },
     "dataSources": {
       "default": {
         "uri": "/odata/",
@@ -14,15 +14,15 @@
         }
       }
     }
-	},
-	"sap.ui5": {
-		"dependencies": {
-			"libs": {
-				"sap.m": {}
-			}
-		},
-		"models": {
-		    "data": {
+  },
+  "sap.ui5": {
+    "dependencies": {
+      "libs": {
+        "sap.m": {}
+      }
+    },
+    "models": {
+      "data": {
         "dataSource": "default",
         "settings": {
           "autoExpandSelect": false,
@@ -31,17 +31,17 @@
           "operationMode": "Server"
         }
       },
-			"": {
-				"type": "sap.ui.model.json.JSONModel"
+      "": {
+        "type": "sap.ui.model.json.JSONModel"
       },
-			"local": {
-				"type": "sap.ui.model.json.JSONModel"
-			}
-		},
-		"rootView": {
-			"viewName": "fokind.bot.view.App",
-			"type": "XML"
-		},
+      "local": {
+        "type": "sap.ui.model.json.JSONModel"
+      }
+    },
+    "rootView": {
+      "viewName": "fokind.bot.view.App",
+      "type": "XML"
+    },
     "routing": {
       "config": {
         "routerClass": "sap.m.routing.Router",
@@ -62,8 +62,8 @@
           "name": "session",
           "target": "session"
         }
-        ],
-        "targets": {
+      ],
+      "targets": {
         "sessions": {
           "viewName": "Sessions",
           "viewLevel": 0
@@ -73,6 +73,6 @@
           "viewLevel": 1
         }
       }
-	}
-	}
+    }
+  }
 }

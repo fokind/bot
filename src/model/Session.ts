@@ -8,6 +8,86 @@ import { BotServer } from "../server";
 import { Candle } from "./Candle";
 import { Ticker } from "./Ticker";
 
+async function onCandles(
+  {
+    exchange,
+    currency,
+    asset,
+    period
+  }: {
+    exchange: string;
+    currency: string;
+    asset: string;
+    period: number;
+  },
+  candles: ICandle[]
+) {
+  const eventBus = BotServer.eventBus;
+  const db = await connect();
+  candles
+    .map(e =>
+      Object.assign(
+        {
+          exchange,
+          currency,
+          asset,
+          period
+        },
+        e
+      )
+    )
+    .forEach(async candle => {
+      await db.collection("candle").updateOne(
+        {
+          exchange,
+          currency,
+          asset,
+          period,
+          time: candle.time
+        },
+        { $set: candle },
+        { upsert: true }
+      );
+      eventBus.emit("candle", candle);
+    });
+}
+
+async function onTicker({
+  exchange,
+  currency,
+  asset,
+  ask,
+  bid
+}: {
+  exchange: string;
+  currency: string;
+  asset: string;
+  ask: number;
+  bid: number;
+}) {
+  const eventBus = BotServer.eventBus;
+  const db = await connect();
+
+  const ticker1 = {
+    exchange,
+    currency,
+    asset,
+    ask,
+    bid
+  };
+
+  await db.collection("ticker").updateOne(
+    {
+      exchange,
+      currency,
+      asset
+    },
+    { $set: ticker1 },
+    { upsert: true }
+  );
+  eventBus.emit("ticker", ticker1);
+}
+
 export class Session {
   @Edm.Key
   @Edm.Computed
@@ -41,68 +121,10 @@ export class Session {
   constructor(data: any) {
     Object.assign(this, data);
   }
-  
-  private async _onCandles(candles: ICandle[]) {
-      const {
-          exchange,
-          currency,
-          asset,
-          period
-        } = this;
-      candles.map(e => 
-        Object.assign(e, { // косяк, меняются входные данные
-          exchange,
-          currency,
-          asset,
-          period
-        })
-        ).forEach(async candle => {
-        await db.collection("candle").updateOne(
-          {
-            exchange,
-            currency,
-            asset,
-            period,
-            time: candle.time
-          },
-          { $set: candle },
-          { upsert: true }
-        );
-        eventBus.emit("candle", candle);
-      });
-  }
-
-  private async _onTicket({ ask, bid }: { ask: number; bid: number; }) {
-      const {
-        exchange,
-        currency,
-        asset
-      } = this;
-
-      const ticker = {
-        exchange,
-        currency,
-        asset,
-        ask,
-        bid
-      };
-
-      await db.collection("ticker").updateOne(
-        {
-          exchange,
-          currency,
-          asset
-        },
-        { $set: ticker1 },
-        { upsert: true }
-      );
-      eventBus.emit("ticker", ticker1);
-  }
 
   @Edm.Action
   public async start(@odata.result result: any): Promise<void> {
     const begin = moment.utc().toISOString();
-    const eventBus = BotServer.eventBus;
     const _id = new ObjectID(result._id);
     const db = await connect();
     const collectionSession = db.collection("session");
@@ -131,11 +153,28 @@ export class Session {
     });
 
     service.on("ticker", async ticker => {
-      await this._onTicker(ticker);
+      await onTicker(
+        Object.assign(
+          {
+            exchange,
+            currency,
+            asset
+          },
+          ticker
+        )
+      );
     });
 
     service.on("candles", async (candles: ICandle[]) => {
-      await this._onCandles(candles);
+      await onCandles(
+        {
+          exchange,
+          currency,
+          asset,
+          period
+        },
+        candles
+      );
     });
 
     await service.start();
