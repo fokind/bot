@@ -41,6 +41,63 @@ export class Session {
   constructor(data: any) {
     Object.assign(this, data);
   }
+  
+  private async _onCandles(candles: ICandle[]) {
+      const {
+          exchange,
+          currency,
+          asset,
+          period
+        } = this;
+      candles.map(e => 
+        Object.assign(e, { // косяк, меняются входные данные
+          exchange,
+          currency,
+          asset,
+          period
+        })
+        ).forEach(async candle => {
+        await db.collection("candle").updateOne(
+          {
+            exchange,
+            currency,
+            asset,
+            period,
+            time: candle.time
+          },
+          { $set: candle },
+          { upsert: true }
+        );
+        eventBus.emit("candle", candle);
+      });
+  }
+
+  private async _onTicket({ ask, bid }: { ask: number; bid: number; }) {
+      const {
+        exchange,
+        currency,
+        asset
+      } = this;
+
+      const ticker = {
+        exchange,
+        currency,
+        asset,
+        ask,
+        bid
+      };
+
+      await db.collection("ticker").updateOne(
+        {
+          exchange,
+          currency,
+          asset
+        },
+        { $set: ticker1 },
+        { upsert: true }
+      );
+      eventBus.emit("ticker", ticker1);
+  }
 
   @Edm.Action
   public async start(@odata.result result: any): Promise<void> {
@@ -74,44 +131,11 @@ export class Session {
     });
 
     service.on("ticker", async ticker => {
-      ticker = Object.assign(ticker, {
-        exchange,
-        currency,
-        asset
-      });
-      await db.collection("ticker").updateOne(
-        {
-          exchange,
-          currency,
-          asset
-        },
-        { $set: ticker },
-        { upsert: true }
-      );
-      eventBus.emit("ticker", ticker);
+      await this._onTicker(ticker);
     });
 
     service.on("candles", async (candles: ICandle[]) => {
-      candles.forEach(async candle => {
-        candle = Object.assign(candle, {
-          exchange,
-          currency,
-          asset,
-          period
-        });
-        await db.collection("candle").updateOne(
-          {
-            exchange,
-            currency,
-            asset,
-            period,
-            time: candle.time
-          },
-          { $set: candle },
-          { upsert: true }
-        );
-        eventBus.emit("candle", candle);
-      });
+      await this._onCandles(candles);
     });
 
     await service.start();
