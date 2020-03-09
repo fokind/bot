@@ -40,11 +40,32 @@ export class Session {
 
   @Edm.Action
   public async start(@odata.result result: any): Promise<void> {
-    SessionService.start(result._id);
+    const { _id, exchange, currency, asset, period } = result;
+    SessionService.start(_id, {
+      sessionId: _id,
+      exchange,
+      currency,
+      asset,
+      period
+    });
   }
 
   @Edm.Action
   public async stop(@odata.result result: any): Promise<void> {
     SessionService.stop(result._id);
+  }
+
+  @Edm.Action
+  public async createOrder(
+    @odata.result result: any,
+    @odata.body
+    {
+      side
+    }: {
+      side: string;
+    }
+  ): Promise<void> {
+    await SessionService.createOrder(result._id, { side });
+    // простое создание ордера, т.к. покупка подразумевает сложную тактику
   }
 }

@@ -87,7 +87,69 @@ async function onTicker({
 }
 
 export class SessionService extends EventEmitter {
-  public static async start(sessionId: string): Promise<void> {
+  public static async createOrder(
+    sessionId: string,
+    { side }: { side: string }
+  ): Promise<string> {
+    return SessionService.getInstance(sessionId).createOrder({ side });
+  }
+
+  public static createInstance(
+    sessionId: string,
+    options: {
+      sessionId: string;
+      exchange: string;
+      currency: string;
+      asset: string;
+      period: number;
+    }
+  ): SessionService {
+    const sessionService = new SessionService(options);
+    SessionService._instances[sessionId] = sessionService;
+    return sessionService;
+  }
+
+  public static getInstance(sessionId: string): SessionService {
+    return SessionService._instances[sessionId];
+  }
+
+  public static async start(
+    sessionId: string,
+    options?: {
+      sessionId: string;
+      exchange: string;
+      currency: string;
+      asset: string;
+      period: number;
+    }
+  ): Promise<void> {
+    (
+      SessionService.getInstance(sessionId) ||
+      SessionService.createInstance(sessionId, options)
+    ).start();
+  }
+
+  public static async stop(sessionId: string): Promise<void> {
+    SessionService.getInstance(sessionId).stop();
+  }
+
+  private static _instances: any = {};
+
+  public sessionId: string;
+  public exchange: string;
+  public currency: string;
+  public asset: string;
+  public period: number;
+  private _exchangeService: ExchangeService;
+
+  constructor(data: any) {
+    super();
+    Object.assign(this, data);
+    this._exchangeService = new ExchangeService(data);
+  }
+
+  public async start(): Promise<void> {
+    const sessionId = this.sessionId;
     const begin = moment.utc().toISOString();
     const _id = new ObjectID(sessionId);
     const db = await connect();
@@ -108,13 +170,7 @@ export class SessionService extends EventEmitter {
       period
     } = await collectionSession.findOne({ _id });
 
-    const service = new ExchangeService({
-      exchange,
-      currency,
-      asset,
-      period,
-      sessionId
-    });
+    const service = this._exchangeService;
 
     service.on("ticker", async ticker => {
       await onTicker(
@@ -144,8 +200,9 @@ export class SessionService extends EventEmitter {
     await service.start();
   }
 
-  public static async stop(sessionId: string): Promise<void> {
-    await ExchangeService.stop(sessionId);
+  public async stop(): Promise<void> {
+    const sessionId = this.sessionId;
+    await this._exchangeService.stop();
     const end = moment.utc().toISOString();
     const _id = new ObjectID(sessionId);
     await (await connect()).collection("session").updateOne(
@@ -156,5 +213,23 @@ export class SessionService extends EventEmitter {
         }
       }
     );
+  }
+
+  public async createOrder({ side }: { side: string }): Promise<string> {
+    const _id = new ObjectID(this.sessionId);
+    const trade: any = {
+      time: moment.utc().toISOString(),
+      side,
+      sessionId: _id
+    };
+
+    const db = await connect();
+    const collectionTrade = db.collection("trade");
+    trade._id = (await collectionTrade.insertOne(trade)).insertedId;
+
+    const eventBus = BotServer.eventBus;
+    eventBus.emit("trade", trade);
+
+    return Promise.resolve("");
   }
 }
