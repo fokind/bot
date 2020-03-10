@@ -63,13 +63,13 @@ export class Session {
   public async createOrder(
     @odata.result result: any,
     @odata.body
-    {
-      side
-    }: {
+    body: {
       side: string;
+      price: number;
+      quantity: number;
     }
   ): Promise<void> {
-    await SessionService.createOrder(result._id, { side });
+    await SessionService.createOrder(result._id, body);
     // простое создание ордера, т.к. покупка подразумевает сложную тактику
   }
 }

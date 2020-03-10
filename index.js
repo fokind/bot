@@ -27,6 +27,7 @@ app.ws("/ws", ws => {
       console.log(error);
     }
   });
+
   eventBus.on("candle", e => {
     try {
       ws.send(
@@ -39,6 +40,7 @@ app.ws("/ws", ws => {
       console.log(error);
     }
   });
+
   eventBus.on("trade", e => {
     try {
       ws.send(

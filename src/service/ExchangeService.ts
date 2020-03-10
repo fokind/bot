@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
 import { ICandle, ITicker, liveCandles, liveTicker } from "exchange-service";
+import moment from "moment";
 
 export class ExchangeService extends EventEmitter {
   public sessionId: string;
@@ -25,16 +26,15 @@ export class ExchangeService extends EventEmitter {
     quantity: number;
   }): Promise<string> {
     setTimeout(() => {
-        
-        this.emit("trade", {
-            parameters: {
-              time: moment.utc().toISOString(),
-              side,
-              price,
-              quantity,
-              amount: price * quantity
-            }
-        });
+      this.emit("trade", {
+        parameters: {
+          time: moment.utc().toISOString(),
+          side,
+          price,
+          quantity,
+          amount: price * quantity
+        }
+      });
     }, 1);
     return Promise.resolve("1");
   }
@@ -57,10 +57,7 @@ export class ExchangeService extends EventEmitter {
   }
 
   public async stop(): Promise<[void, void]> {
-    return Promise.all([
-      this.stopTicker(),
-      this.stopCandles()
-    ]);
+    return Promise.all([this.stopTicker(), this.stopCandles()]);
   }
 
   public startTicker() {

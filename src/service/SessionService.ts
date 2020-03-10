@@ -6,8 +6,6 @@ import connect from "../connect";
 import { BotServer } from "../server";
 import { ExchangeService } from "./ExchangeService";
 
-const eventBus = BotServer.eventBus;
-
 async function onCandles(
   {
     exchange,
@@ -22,6 +20,7 @@ async function onCandles(
   },
   candles: ICandle[]
 ) {
+  const eventBus = BotServer.eventBus;
   const db = await connect();
   candles
     .map(e =>
@@ -83,15 +82,19 @@ async function onTicker({
     { $set: ticker1 },
     { upsert: true }
   );
-  eventBus.emit("ticker", ticker1);
+  BotServer.eventBus.emit("ticker", ticker1);
 }
 
 export class SessionService extends EventEmitter {
   public static async createOrder(
     sessionId: string,
-    { side }: { side: string }
+    options: {
+      side: string;
+      price: number;
+      quantity: number;
+    }
   ): Promise<string> {
-    return SessionService.getInstance(sessionId).createOrder({ side });
+    return SessionService.getInstance(sessionId).createOrder(options);
   }
 
   public static createInstance(
@@ -111,39 +114,6 @@ export class SessionService extends EventEmitter {
 
   public static getInstance(sessionId: string): SessionService {
     return SessionService._instances[sessionId];
-  }
-  
-  public static async onExchangeTrade(event: {
-    parameters: {
-        time: string;
-        side: string;
-        price: number;
-        quantity: number;
-        amount: number;
-    }
-  }) {
-    const {
-        time,
-        side,
-        price,
-        quantity,
-        amount
-    } = event.parameters;
-    
-    const trade = {
-        time,
-        side,
-        price,
-        quantity,
-        amount,
-        sessionId: this.sessionId
-    };
-    
-    const db = await connect();
-    const collectionTrade = db.collection("trade");
-    trade._id = (await collectionTrade.insertOne(trade)).insertedId;
-
-    eventBus.emit("trade", trade);
   }
 
   public static async start(
@@ -183,6 +153,33 @@ export class SessionService extends EventEmitter {
       await this.onExchangeTrade(event);
     });
     // UNDONE подписать на остальные события
+  }
+
+  public async onExchangeTrade(event: {
+    parameters: {
+      time: string;
+      side: string;
+      price: number;
+      quantity: number;
+      amount: number;
+    };
+  }) {
+    const { time, side, price, quantity, amount } = event.parameters;
+
+    const trade: any = {
+      time,
+      side,
+      price,
+      quantity,
+      amount,
+      sessionId: this.sessionId
+    };
+
+    const db = await connect();
+    const collectionTrade = db.collection("trade");
+    trade._id = (await collectionTrade.insertOne(trade)).insertedId;
+
+    BotServer.eventBus.emit("trade", trade);
   }
 
   public async start(): Promise<void> {
@@ -252,19 +249,11 @@ export class SessionService extends EventEmitter {
     );
   }
 
-  public async createOrder({
-    side,
-    price,
-    quantity
-  }: {
+  public async createOrder(options: {
     side: string;
     price: number;
     quantity: number;
   }): Promise<string> {
-    return await this._exchangeService.createOrder({
-        side,
-        price,
-        quantity
-      });
+    return await this._exchangeService.createOrder(options);
   }
 }

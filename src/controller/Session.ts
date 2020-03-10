@@ -166,7 +166,7 @@ export class SessionController extends ODataController {
     @odata.result result: any,
     @odata.query query: ODataQuery
   ): Promise<Trade[]> {
-      const sessionId = new ObjectID(result._id);
+    const sessionId = new ObjectID(result._id);
     const db = await connect();
     const collection = db.collection("trade");
     const mongodbQuery = createQuery(query);
