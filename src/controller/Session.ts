@@ -5,6 +5,7 @@ import connect from "../connect";
 import { Candle } from "../model/Candle";
 import { Session } from "../model/Session";
 import { Ticker } from "../model/Ticker";
+import { Trade } from "../model/Trade";
 
 const collectionName = "session";
 
@@ -150,6 +151,48 @@ export class SessionController extends ODataController {
               currency,
               asset,
               period
+            },
+            mongodbQuery.query
+          ]
+        })
+        .project(mongodbQuery.projection)
+        .count(false);
+    }
+    return items;
+  }
+
+  @odata.GET("Trades")
+  public async getTrades(
+    @odata.result result: any,
+    @odata.query query: ODataQuery
+  ): Promise<Trade[]> {
+      const sessionId = new ObjectID(result._id);
+    const db = await connect();
+    const collection = db.collection("trade");
+    const mongodbQuery = createQuery(query);
+    const items: any =
+      typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
+        ? []
+        : await collection
+            .find({
+              $and: [
+                {
+                  sessionId
+                },
+                mongodbQuery.query
+              ]
+            })
+            .project(mongodbQuery.projection)
+            .skip(mongodbQuery.skip || 0)
+            .limit(mongodbQuery.limit || 0)
+            .sort(mongodbQuery.sort)
+            .toArray();
+    if (mongodbQuery.inlinecount) {
+      items.inlinecount = await collection
+        .find({
+          $and: [
+            {
+              sessionId
             },
             mongodbQuery.query
           ]

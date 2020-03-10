@@ -6,6 +6,8 @@ import connect from "../connect";
 import { BotServer } from "../server";
 import { ExchangeService } from "./ExchangeService";
 
+const eventBus = BotServer.eventBus;
+
 async function onCandles(
   {
     exchange,
@@ -20,7 +22,6 @@ async function onCandles(
   },
   candles: ICandle[]
 ) {
-  const eventBus = BotServer.eventBus;
   const db = await connect();
   candles
     .map(e =>
@@ -63,7 +64,6 @@ async function onTicker({
   ask: number;
   bid: number;
 }) {
-  const eventBus = BotServer.eventBus;
   const db = await connect();
 
   const ticker1 = {
@@ -112,6 +112,39 @@ export class SessionService extends EventEmitter {
   public static getInstance(sessionId: string): SessionService {
     return SessionService._instances[sessionId];
   }
+  
+  public static async onExchangeTrade(event: {
+    parameters: {
+        time: string;
+        side: string;
+        price: number;
+        quantity: number;
+        amount: number;
+    }
+  }) {
+    const {
+        time,
+        side,
+        price,
+        quantity,
+        amount
+    } = event.parameters;
+    
+    const trade = {
+        time,
+        side,
+        price,
+        quantity,
+        amount,
+        sessionId: this.sessionId
+    };
+    
+    const db = await connect();
+    const collectionTrade = db.collection("trade");
+    trade._id = (await collectionTrade.insertOne(trade)).insertedId;
+
+    eventBus.emit("trade", trade);
+  }
 
   public static async start(
     sessionId: string,
@@ -146,6 +179,10 @@ export class SessionService extends EventEmitter {
     super();
     Object.assign(this, data);
     this._exchangeService = new ExchangeService(data);
+    this._exchangeService.on("trade", async (event: any) => {
+      await this.onExchangeTrade(event);
+    });
+    // UNDONE подписать на остальные события
   }
 
   public async start(): Promise<void> {
@@ -215,21 +252,19 @@ export class SessionService extends EventEmitter {
     );
   }
 
-  public async createOrder({ side }: { side: string }): Promise<string> {
-    const _id = new ObjectID(this.sessionId);
-    const trade: any = {
-      time: moment.utc().toISOString(),
-      side,
-      sessionId: _id
-    };
-
-    const db = await connect();
-    const collectionTrade = db.collection("trade");
-    trade._id = (await collectionTrade.insertOne(trade)).insertedId;
-
-    const eventBus = BotServer.eventBus;
-    eventBus.emit("trade", trade);
-
-    return Promise.resolve("");
+  public async createOrder({
+    side,
+    price,
+    quantity
+  }: {
+    side: string;
+    price: number;
+    quantity: number;
+  }): Promise<string> {
+    return await this._exchangeService.createOrder({
+        side,
+        price,
+        quantity
+      });
   }
 }

@@ -3,6 +3,7 @@ import { Edm, odata } from "odata-v4-server";
 import { SessionService } from "../service/SessionService";
 import { Candle } from "./Candle";
 import { Ticker } from "./Ticker";
+import { Trade } from "./Trade";
 
 export class Session {
   @Edm.Key
@@ -30,6 +31,9 @@ export class Session {
 
   @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Candle)))
   public Candles: Candle[];
+
+  @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Trade)))
+  public Trades: Trade[];
 
   @Edm.EntityType(Edm.ForwardRef(() => Ticker))
   public Ticker: Ticker;

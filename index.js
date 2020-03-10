@@ -39,6 +39,18 @@ app.ws("/ws", ws => {
       console.log(error);
     }
   });
+  eventBus.on("trade", e => {
+    try {
+      ws.send(
+        JSON.stringify({
+          name: "trade",
+          data: e
+        })
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  });
 });
 
 app.listen(port, () => {

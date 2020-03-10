@@ -16,11 +16,27 @@ export class ExchangeService extends EventEmitter {
   }
 
   public async createOrder({
-    side
+    side,
+    price,
+    quantity
   }: {
     side: string;
-  }): Promise<void> {
-    return Promise.reject();
+    price: number;
+    quantity: number;
+  }): Promise<string> {
+    setTimeout(() => {
+        
+        this.emit("trade", {
+            parameters: {
+              time: moment.utc().toISOString(),
+              side,
+              price,
+              quantity,
+              amount: price * quantity
+            }
+        });
+    }, 1);
+    return Promise.resolve("1");
   }
 
   public async stopTicker(): Promise<void> {
