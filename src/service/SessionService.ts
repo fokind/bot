@@ -139,18 +139,39 @@ export class SessionService extends EventEmitter {
   private static _instances: any = {};
 
   public sessionId: string;
-  public exchange: string;
-  public currency: string;
-  public asset: string;
-  public period: number;
   private _exchangeService: ExchangeService;
 
-  constructor(data: any) {
+  constructor({
+      sessionId,
+  exchange,
+  currency,
+  asset,
+  period,
+  initialBalance
+  }: {
+      sessionId: string;
+  exchange: string;
+  currency: string;
+  asset: string;
+  period: number;
+  initialBalance: number;
+  }) {
     super();
-    Object.assign(this, data);
-    this._exchangeService = new ExchangeService(data);
+    Object.assign(this, {
+      sessionId
+  });
+    this._exchangeService = new ExchangeService({
+  exchange,
+  currency,
+  asset,
+  period,
+  initialBalance
+  });
     this._exchangeService.on("trade", async (event: any) => {
       await this.onExchangeTrade(event);
+    });
+    this._exchangeService.on("balance", async (event: any) => {
+      await this.onExchangeBalance(event);
     });
     // UNDONE подписать на остальные события
   }

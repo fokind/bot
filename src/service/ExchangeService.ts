@@ -3,17 +3,52 @@ import { ICandle, ITicker, liveCandles, liveTicker } from "exchange-service";
 import moment from "moment";
 
 export class ExchangeService extends EventEmitter {
-  public sessionId: string;
   public exchange: string;
   public currency: string;
   public asset: string;
   public period: number;
+  public currencyAvailable: number;
+  public currencyReserved: number = 0;
+  public assetAvailable: number = 0;
+  public assetReserved: number = 0;
   private _tickerStream: any;
   private _candlesStream: any;
 
-  constructor(data: any) {
+  constructor({
+  exchange,
+  currency,
+  asset,
+  period,
+  currencyAvailable
+  }: {
+  exchange: string;
+  currency: string;
+  asset: string;
+  period: number;
+  currencyAvailable: number;
+  }) {
     super();
-    Object.assign(this, data);
+    Object.assign(this, {
+  exchange,
+  currency,
+  asset,
+  period,
+  currencyAvailable
+  });
+  }
+  
+  private emitBalance() {
+                    const { currencyAvailable,
+        currencyReserved,
+        assetAvailable,
+        assetReserved } = this;
+
+      this.emit("balance", {
+        parameters: { currencyAvailable,
+        currencyReserved,
+        assetAvailable,
+        assetReserved }
+      });
   }
 
   public async createOrder({
@@ -25,18 +60,54 @@ export class ExchangeService extends EventEmitter {
     price: number;
     quantity: number;
   }): Promise<string> {
+      if (price <= 0 || quantity <= 0)
+      const amount = price * quantity; // TODO заменить на более точное вычисление
+      const { currencyAvailable } = this;
+      
+      switch (side) {
+          case: "buy";
+          if (amount > currencyAvailable) {
+              reject();
+          }
+          this.currencyAvailable -= amount;
+          this.currencyReserved += amount;
+          break;
+          case: "sell";
+          if (quantity > assetAvailable) {
+              reject();
+          }
+          this.assetAvailable -= quantity;
+          this.assetReserved += quantity;
+          break;
+          default:
+           reject();
+      }
+      this.emitBalance();
+
+      // вернуть ошибку, если невозможно выполнить
+      // изменить баланс
     setTimeout(() => {
+      if(side === "buy") {
+          this.currencyReserved -= amount;
+          this.assetAvailable += quantity;
+          } else {
+          this.assetReserved -= quantity;
+          this.currencyAvailable += amount;
+      }
+
       this.emit("trade", {
         parameters: {
           time: moment.utc().toISOString(),
           side,
           price,
           quantity,
-          amount: price * quantity
+          amount
         }
       });
-    }, 1);
-    return Promise.resolve("1");
+
+      this.emitBalance();
+    }, 0);
+    return Promise.resolve("");
   }
 
   public async stopTicker(): Promise<void> {
@@ -48,7 +119,6 @@ export class ExchangeService extends EventEmitter {
   }
 
   public async stopCandles(): Promise<void> {
-    const sessionId = this.sessionId;
     const candlesStream = this._candlesStream;
     return new Promise(resolve => {
       candlesStream.on("close", resolve);
