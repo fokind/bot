@@ -7,7 +7,7 @@ export class ExchangeService extends EventEmitter {
   public currency: string;
   public asset: string;
   public period: number;
-  public currencyAvailable: number;
+  public currencyAvailable: number = 0;
   public currencyReserved: number = 0;
   public assetAvailable: number = 0;
   public assetReserved: number = 0;
@@ -35,6 +35,10 @@ export class ExchangeService extends EventEmitter {
   period,
   currencyAvailable
   });
+  }
+  
+  public async getCurrencyAvailable(): Promise<number> {
+      return Promise.resolve(this.currencyAvailable);
   }
   
   private emitBalance() {

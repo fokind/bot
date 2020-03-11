@@ -60,6 +60,16 @@ export class Session {
   }
 
   @Edm.Action
+  public async buy(@odata.result result: any): Promise<void> {
+    SessionService.buy(result._id);
+  }
+
+  @Edm.Action
+  public async sell(@odata.result result: any): Promise<void> {
+    SessionService.sell(result._id);
+  }
+
+  @Edm.Action
   public async createOrder(
     @odata.result result: any,
     @odata.body

@@ -126,14 +126,22 @@ export class SessionService extends EventEmitter {
       period: number;
     }
   ): Promise<void> {
-    (
+    return (
       SessionService.getInstance(sessionId) ||
       SessionService.createInstance(sessionId, options)
     ).start();
   }
 
   public static async stop(sessionId: string): Promise<void> {
-    SessionService.getInstance(sessionId).stop();
+    return SessionService.getInstance(sessionId).stop();
+  }
+
+  public static async buy(sessionId: string): Promise<void> {
+    return SessionService.getInstance(sessionId).buy();
+  }
+
+  public static async sell(sessionId: string): Promise<void> {
+    return SessionService.getInstance(sessionId).sell();
   }
 
   private static _instances: any = {};
@@ -165,13 +173,13 @@ export class SessionService extends EventEmitter {
   currency,
   asset,
   period,
-  initialBalance
+  currencyAvailable: initialBalance
   });
     this._exchangeService.on("trade", async (event: any) => {
       await this.onExchangeTrade(event);
     });
     this._exchangeService.on("balance", async (event: any) => {
-      await this.onExchangeBalance(event);
+      await this.onExchangeBalance(event); // UNDONE
     });
     // UNDONE подписать на остальные события
   }
@@ -276,5 +284,26 @@ export class SessionService extends EventEmitter {
     quantity: number;
   }): Promise<string> {
     return await this._exchangeService.createOrder(options);
+  }
+  
+  public async buy(): Promise<void> {
+      const { ask, bid } = await this._exchangeService.getTicker();
+      const price: number = (ask + bid) / 2; // UNDONE округлить до заданной точности
+      const available: number = await this.getCurrencyAvailable();
+      const quantity: number = available / price; // UNDONE округлить в меньшую сторону до заданной точности
+
+  await this.createOrder({
+      side: "buy", price, quantity
+  });
+  }  
+  
+  public async sell(): Promise<void> {
+      const { ask, bid } = await this._exchangeService.getTicker();
+      const price: number = (ask + bid) / 2; // UNDONE округлить до заданной точности
+      const quantity: number = await this.getAssetAvailable();
+
+  await this.createOrder({
+      side: "sell", price, quantity
+  });
   }
 }
