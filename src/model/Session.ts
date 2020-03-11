@@ -23,6 +23,18 @@ export class Session {
   @Edm.Double
   public period: number;
 
+  @Edm.Double
+  public initialBalance: number;
+  // TODO добавить ссылку на модель баланса
+  // при старте туда прописывается это поле
+  // при остановке формируется окончательный баланс
+  // в процессе estimateBalance
+  // модель баланса содержит ключ в виде валюты и др.
+  // содержит доступное и зарезервированное количество
+  // данные берутся из сервиса биржи, в режиме эмуляции из памяти, в реальном режиме с реальной биржи
+  // сначала меняется баланс и формируется событие, затем формируется трейд, затем закрывается ордер
+  // если сначала закрывается ордер, то можно создать новый, а данные по балансу будут некорректны
+
   @Edm.String
   public begin: string;
 
@@ -44,14 +56,7 @@ export class Session {
 
   @Edm.Action
   public async start(@odata.result result: any): Promise<void> {
-    const { _id, exchange, currency, asset, period } = result;
-    SessionService.start(_id, {
-      sessionId: _id,
-      exchange,
-      currency,
-      asset,
-      period
-    });
+    SessionService.start(result._id);
   }
 
   @Edm.Action

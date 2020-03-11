@@ -1,5 +1,11 @@
 import { EventEmitter } from "events";
-import { ICandle, ITicker, liveCandles, liveTicker } from "exchange-service";
+import {
+  getTicker,
+  ICandle,
+  ITicker,
+  liveCandles,
+  liveTicker
+} from "exchange-service";
 import moment from "moment";
 
 export class ExchangeService extends EventEmitter {
@@ -15,44 +21,43 @@ export class ExchangeService extends EventEmitter {
   private _candlesStream: any;
 
   constructor({
-  exchange,
-  currency,
-  asset,
-  period,
-  currencyAvailable
+    exchange,
+    currency,
+    asset,
+    period,
+    currencyAvailable
   }: {
-  exchange: string;
-  currency: string;
-  asset: string;
-  period: number;
-  currencyAvailable: number;
+    exchange: string;
+    currency: string;
+    asset: string;
+    period: number;
+    currencyAvailable: number;
   }) {
     super();
     Object.assign(this, {
-  exchange,
-  currency,
-  asset,
-  period,
-  currencyAvailable
-  });
+      exchange,
+      currency,
+      asset,
+      period,
+      currencyAvailable
+    });
   }
-  
-  public async getCurrencyAvailable(): Promise<number> {
-      return Promise.resolve(this.currencyAvailable);
-  }
-  
-  private emitBalance() {
-                    const { currencyAvailable,
-        currencyReserved,
-        assetAvailable,
-        assetReserved } = this;
 
-      this.emit("balance", {
-        parameters: { currencyAvailable,
-        currencyReserved,
-        assetAvailable,
-        assetReserved }
-      });
+  public async getAssetAvailable(): Promise<number> {
+    return Promise.resolve(this.assetAvailable);
+  }
+
+  public async getCurrencyAvailable(): Promise<number> {
+    return Promise.resolve(this.currencyAvailable);
+  }
+
+  public async getTicker(): Promise<ITicker> {
+    const { exchange, currency, asset } = this;
+    return getTicker({
+      exchange,
+      currency,
+      asset
+    });
   }
 
   public async createOrder({
@@ -64,39 +69,43 @@ export class ExchangeService extends EventEmitter {
     price: number;
     quantity: number;
   }): Promise<string> {
-      if (price <= 0 || quantity <= 0)
-      const amount = price * quantity; // TODO заменить на более точное вычисление
-      const { currencyAvailable } = this;
-      
-      switch (side) {
-          case: "buy";
-          if (amount > currencyAvailable) {
-              reject();
-          }
-          this.currencyAvailable -= amount;
-          this.currencyReserved += amount;
-          break;
-          case: "sell";
-          if (quantity > assetAvailable) {
-              reject();
-          }
-          this.assetAvailable -= quantity;
-          this.assetReserved += quantity;
-          break;
-          default:
-           reject();
-      }
-      this.emitBalance();
+    // TODO лучше обрабатывать ошибки
+    if (price <= 0 || quantity <= 0) {
+      return Promise.reject();
+    }
 
-      // вернуть ошибку, если невозможно выполнить
-      // изменить баланс
+    const amount = price * quantity; // TODO заменить на более точное вычисление
+    const { currencyAvailable, assetAvailable } = this;
+
+    switch (side) {
+      case "buy":
+        if (amount > currencyAvailable) {
+          return Promise.reject();
+        }
+        this.currencyAvailable -= amount;
+        this.currencyReserved += amount;
+        break;
+      case "sell":
+        if (quantity > assetAvailable) {
+          return Promise.reject();
+        }
+        this.assetAvailable -= quantity;
+        this.assetReserved += quantity;
+        break;
+      default:
+        return Promise.reject();
+    }
+    this._emitBalance();
+
+    // вернуть ошибку, если невозможно выполнить
+    // изменить баланс
     setTimeout(() => {
-      if(side === "buy") {
-          this.currencyReserved -= amount;
-          this.assetAvailable += quantity;
-          } else {
-          this.assetReserved -= quantity;
-          this.currencyAvailable += amount;
+      if (side === "buy") {
+        this.currencyReserved -= amount;
+        this.assetAvailable += quantity;
+      } else {
+        this.assetReserved -= quantity;
+        this.currencyAvailable += amount;
       }
 
       this.emit("trade", {
@@ -109,7 +118,7 @@ export class ExchangeService extends EventEmitter {
         }
       });
 
-      this.emitBalance();
+      this._emitBalance();
     }, 0);
     return Promise.resolve("");
   }
@@ -170,5 +179,23 @@ export class ExchangeService extends EventEmitter {
   public start() {
     this.startTicker();
     this.startCandles();
+  }
+
+  private _emitBalance() {
+    const {
+      currencyAvailable,
+      currencyReserved,
+      assetAvailable,
+      assetReserved
+    } = this;
+
+    this.emit("balance", {
+      parameters: {
+        currencyAvailable,
+        currencyReserved,
+        assetAvailable,
+        assetReserved
+      }
+    });
   }
 }

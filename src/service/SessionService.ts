@@ -97,17 +97,29 @@ export class SessionService extends EventEmitter {
     return SessionService.getInstance(sessionId).createOrder(options);
   }
 
-  public static createInstance(
-    sessionId: string,
-    options: {
-      sessionId: string;
-      exchange: string;
-      currency: string;
-      asset: string;
-      period: number;
-    }
-  ): SessionService {
-    const sessionService = new SessionService(options);
+  public static async createInstance(
+    sessionId: string
+  ): Promise<SessionService> {
+    const _id = new ObjectID(sessionId);
+    const db = await connect();
+    const collectionSession = db.collection("session");
+
+    const {
+      exchange,
+      currency,
+      asset,
+      period,
+      initialBalance
+    } = await collectionSession.findOne({ _id });
+
+    const sessionService = new SessionService({
+      sessionId,
+      exchange,
+      currency,
+      asset,
+      period,
+      initialBalance
+    });
     SessionService._instances[sessionId] = sessionService;
     return sessionService;
   }
@@ -116,19 +128,10 @@ export class SessionService extends EventEmitter {
     return SessionService._instances[sessionId];
   }
 
-  public static async start(
-    sessionId: string,
-    options?: {
-      sessionId: string;
-      exchange: string;
-      currency: string;
-      asset: string;
-      period: number;
-    }
-  ): Promise<void> {
+  public static async start(sessionId: string): Promise<void> {
     return (
       SessionService.getInstance(sessionId) ||
-      SessionService.createInstance(sessionId, options)
+      (await SessionService.createInstance(sessionId))
     ).start();
   }
 
@@ -150,37 +153,41 @@ export class SessionService extends EventEmitter {
   private _exchangeService: ExchangeService;
 
   constructor({
-      sessionId,
-  exchange,
-  currency,
-  asset,
-  period,
-  initialBalance
+    sessionId,
+    exchange,
+    currency,
+    asset,
+    period,
+    initialBalance
   }: {
-      sessionId: string;
-  exchange: string;
-  currency: string;
-  asset: string;
-  period: number;
-  initialBalance: number;
+    sessionId: string;
+    exchange: string;
+    currency: string;
+    asset: string;
+    period: number;
+    initialBalance?: number;
   }) {
     super();
+
     Object.assign(this, {
       sessionId
-  });
+    });
+
     this._exchangeService = new ExchangeService({
-  exchange,
-  currency,
-  asset,
-  period,
-  currencyAvailable: initialBalance
-  });
+      exchange,
+      currency,
+      asset,
+      period,
+      currencyAvailable: initialBalance
+    });
+
     this._exchangeService.on("trade", async (event: any) => {
       await this.onExchangeTrade(event);
     });
-    this._exchangeService.on("balance", async (event: any) => {
-      await this.onExchangeBalance(event); // UNDONE
-    });
+
+    // this._exchangeService.on("balance", async (event: any) => {
+    //   await this.onExchangeBalance(event); // UNDONE
+    // });
     // UNDONE подписать на остальные события
   }
 
@@ -212,28 +219,9 @@ export class SessionService extends EventEmitter {
   }
 
   public async start(): Promise<void> {
-    const sessionId = this.sessionId;
-    const begin = moment.utc().toISOString();
-    const _id = new ObjectID(sessionId);
-    const db = await connect();
-    const collectionSession = db.collection("session");
-    await collectionSession.updateOne(
-      { _id },
-      {
-        $set: {
-          begin
-        }
-      }
-    );
-
-    const {
-      exchange,
-      currency,
-      asset,
-      period
-    } = await collectionSession.findOne({ _id });
-
     const service = this._exchangeService;
+
+    const { exchange, currency, asset, period } = service;
 
     service.on("ticker", async ticker => {
       await onTicker(
@@ -285,25 +273,29 @@ export class SessionService extends EventEmitter {
   }): Promise<string> {
     return await this._exchangeService.createOrder(options);
   }
-  
+
   public async buy(): Promise<void> {
-      const { ask, bid } = await this._exchangeService.getTicker();
-      const price: number = (ask + bid) / 2; // UNDONE округлить до заданной точности
-      const available: number = await this.getCurrencyAvailable();
-      const quantity: number = available / price; // UNDONE округлить в меньшую сторону до заданной точности
+    const { ask, bid } = await this._exchangeService.getTicker();
+    const price: number = (ask + bid) / 2; // UNDONE округлить до заданной точности
+    const available: number = await this._exchangeService.getCurrencyAvailable();
+    const quantity: number = available / price; // UNDONE округлить в меньшую сторону до заданной точности
 
-  await this.createOrder({
-      side: "buy", price, quantity
-  });
-  }  
-  
+    await this.createOrder({
+      side: "buy",
+      price,
+      quantity
+    });
+  }
+
   public async sell(): Promise<void> {
-      const { ask, bid } = await this._exchangeService.getTicker();
-      const price: number = (ask + bid) / 2; // UNDONE округлить до заданной точности
-      const quantity: number = await this.getAssetAvailable();
+    const { ask, bid } = await this._exchangeService.getTicker();
+    const price: number = (ask + bid) / 2; // UNDONE округлить до заданной точности
+    const quantity: number = await this._exchangeService.getAssetAvailable();
 
-  await this.createOrder({
-      side: "sell", price, quantity
-  });
+    await this.createOrder({
+      side: "sell",
+      price,
+      quantity
+    });
   }
 }
