@@ -50,6 +50,12 @@ export class Session {
   @Edm.EntityType(Edm.ForwardRef(() => Ticker))
   public Ticker: Ticker;
 
+  @Edm.EntityType(Edm.ForwardRef(() => Balance))
+  public CurrencyBalance: Balance;
+
+  @Edm.EntityType(Edm.ForwardRef(() => Balance))
+  public AssetBalance: Balance;
+
   constructor(data: any) {
     Object.assign(this, data);
   }

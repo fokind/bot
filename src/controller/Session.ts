@@ -232,4 +232,56 @@ export class SessionController extends ODataController {
       )
     );
   }
+
+  @odata.GET("CurrencyBalance")
+  public async getCurrencyBalance(
+    @odata.result result: any,
+    @odata.query query: ODataQuery
+  ): Promise<Balance> {
+    const {
+      currency
+    }: {
+      currency: string;
+    } = result;
+    const sessionId = new ObjectID(result._id);
+    const db = await connect();
+    const collection = db.collection("balance");
+    const { projection } = createQuery(query);
+
+    return new Balance(
+      await collection.findOne(
+        {
+          sessionId,
+          currency
+        },
+        { projection }
+      )
+    );
+  }
+
+  @odata.GET("AssetBalance")
+  public async getAssetBalance(
+    @odata.result result: any,
+    @odata.query query: ODataQuery
+  ): Promise<Balance> {
+    const {
+      asset
+    }: {
+      asset: string;
+    } = result;
+    const sessionId = new ObjectID(result._id);
+    const db = await connect();
+    const collection = db.collection("balance");
+    const { projection } = createQuery(query);
+
+    return new Balance(
+      await collection.findOne(
+        {
+          sessionId,
+          currency: asset
+        },
+        { projection }
+      )
+    );
+  }
 }
