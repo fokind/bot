@@ -243,7 +243,6 @@ export class SessionController extends ODataController {
     }: {
       currency: string;
     } = result;
-    const sessionId = new ObjectID(result._id);
     const db = await connect();
     const collection = db.collection("balance");
     const { projection } = createQuery(query);
@@ -251,7 +250,6 @@ export class SessionController extends ODataController {
     return new Balance(
       await collection.findOne(
         {
-          sessionId,
           currency
         },
         { projection }
@@ -269,7 +267,6 @@ export class SessionController extends ODataController {
     }: {
       asset: string;
     } = result;
-    const sessionId = new ObjectID(result._id);
     const db = await connect();
     const collection = db.collection("balance");
     const { projection } = createQuery(query);
@@ -277,7 +274,6 @@ export class SessionController extends ODataController {
     return new Balance(
       await collection.findOne(
         {
-          sessionId,
           currency: asset
         },
         { projection }

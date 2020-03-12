@@ -10,10 +10,6 @@ export class Balance {
   @Edm.String
   public currency: string;
 
-  @Edm.Key
-  @Edm.String
-  public sessionId: ObjectID;
-
   @Edm.Double
   public available: number;
 
