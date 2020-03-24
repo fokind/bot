@@ -161,6 +161,48 @@ export class SessionController extends ODataController {
     return items;
   }
 
+  @odata.GET("Orders")
+  public async getOrders(
+    @odata.result result: any,
+    @odata.query query: ODataQuery
+  ): Promise<Order[]> {
+    const sessionId = new ObjectID(result._id);
+    const db = await connect();
+    const collection = db.collection("order");
+    const mongodbQuery = createQuery(query);
+    const items: any =
+      typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
+        ? []
+        : await collection
+            .find({
+              $and: [
+                {
+                  sessionId
+                },
+                mongodbQuery.query
+              ]
+            })
+            .project(mongodbQuery.projection)
+            .skip(mongodbQuery.skip || 0)
+            .limit(mongodbQuery.limit || 0)
+            .sort(mongodbQuery.sort)
+            .toArray();
+    if (mongodbQuery.inlinecount) {
+      items.inlinecount = await collection
+        .find({
+          $and: [
+            {
+              sessionId
+            },
+            mongodbQuery.query
+          ]
+        })
+        .project(mongodbQuery.projection)
+        .count(false);
+    }
+    return items;
+  }
+
   @odata.GET("Trades")
   public async getTrades(
     @odata.result result: any,
