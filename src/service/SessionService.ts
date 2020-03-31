@@ -4,7 +4,13 @@ import moment from "moment";
 import { ObjectID } from "mongodb";
 import connect from "../connect";
 import { BotServer } from "../server";
-import { ExchangeService } from "./ExchangeService";
+import { ExchangePaperService } from "./ExchangePaperService";
+
+interface IBalanceItem {
+  currency: string;
+  available: number;
+  reserved: number;
+}
 
 async function onCandles(
   {
@@ -150,7 +156,7 @@ export class SessionService extends EventEmitter {
   private static _instances: any = {};
 
   public sessionId: string;
-  private _exchangeService: ExchangeService;
+  private _exchangeService: ExchangePaperService;
 
   constructor({
     sessionId,
@@ -173,12 +179,12 @@ export class SessionService extends EventEmitter {
       sessionId
     });
 
-    this._exchangeService = new ExchangeService({
+    this._exchangeService = new ExchangePaperService({
       exchange,
       currency,
       asset,
       period,
-      currencyAvailable: initialBalance
+      initialBalance
     });
 
     this._exchangeService.on("trade", async (event: any) => {
@@ -266,12 +272,16 @@ export class SessionService extends EventEmitter {
     );
   }
 
+  public async getCurrencyBalance(): Promise<IBalanceItem> {
+    return this._exchangeService.getCurrencyBalance();
+  }
+
   public async createOrder(options: {
     side: string;
     price: number;
     quantity: number;
   }): Promise<string> {
-    return await this._exchangeService.createOrder(options);
+    return this._exchangeService.createOrder(options);
   }
 
   public async buy(): Promise<void> {
@@ -280,7 +290,7 @@ export class SessionService extends EventEmitter {
     const available: number = await this._exchangeService.getCurrencyAvailable();
     const quantity: number = available / price; // UNDONE округлить в меньшую сторону до заданной точности
 
-    await this.createOrder({
+    this.createOrder({
       side: "buy",
       price,
       quantity
@@ -292,7 +302,7 @@ export class SessionService extends EventEmitter {
     const price: number = (ask + bid) / 2; // UNDONE округлить до заданной точности
     const quantity: number = await this._exchangeService.getAssetAvailable();
 
-    await this.createOrder({
+    this.createOrder({
       side: "sell",
       price,
       quantity

@@ -21,9 +21,9 @@ export class Order {
 
   @Edm.String
   public sessionId: ObjectID;
-  
+
   @Edm.Boolean
-  public active: bool;
+  public active: boolean;
 
   constructor(data: any) {
     Object.assign(this, data);

@@ -2,7 +2,9 @@ import { ObjectID } from "mongodb";
 import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
 import connect from "../connect";
+import { Balance } from "../model/Balance";
 import { Candle } from "../model/Candle";
+import { Order } from "../model/Order";
 import { Session } from "../model/Session";
 import { Ticker } from "../model/Ticker";
 import { Trade } from "../model/Trade";
@@ -25,21 +27,21 @@ export class SessionController extends ODataController {
       typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
         ? []
         : await db
-            .collection(collectionName)
-            .find(mongodbQuery.query)
-            .project(mongodbQuery.projection)
-            .skip(mongodbQuery.skip || 0)
-            .limit(mongodbQuery.limit || 0)
-            .sort(mongodbQuery.sort)
-            .map(
-              e =>
-                new Session(
-                  Object.assign(e, {
-                    // status: Session.streams[e._id] ? "active" : "inactive"
-                  })
-                )
-            )
-            .toArray();
+          .collection(collectionName)
+          .find(mongodbQuery.query)
+          .project(mongodbQuery.projection)
+          .skip(mongodbQuery.skip || 0)
+          .limit(mongodbQuery.limit || 0)
+          .sort(mongodbQuery.sort)
+          .map(
+            e =>
+              new Session(
+                Object.assign(e, {
+                  // status: Session.streams[e._id] ? "active" : "inactive"
+                })
+              )
+          )
+          .toArray();
 
     if (mongodbQuery.inlinecount) {
       result.inlinecount = await db
@@ -126,22 +128,22 @@ export class SessionController extends ODataController {
       typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
         ? []
         : await collection
-            .find({
-              $and: [
-                {
-                  exchange,
-                  currency,
-                  asset,
-                  period
-                },
-                mongodbQuery.query
-              ]
-            })
-            .project(mongodbQuery.projection)
-            .skip(mongodbQuery.skip || 0)
-            .limit(mongodbQuery.limit || 0)
-            .sort(mongodbQuery.sort)
-            .toArray();
+          .find({
+            $and: [
+              {
+                exchange,
+                currency,
+                asset,
+                period
+              },
+              mongodbQuery.query
+            ]
+          })
+          .project(mongodbQuery.projection)
+          .skip(mongodbQuery.skip || 0)
+          .limit(mongodbQuery.limit || 0)
+          .sort(mongodbQuery.sort)
+          .toArray();
     if (mongodbQuery.inlinecount) {
       items.inlinecount = await collection
         .find({
@@ -174,19 +176,19 @@ export class SessionController extends ODataController {
       typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
         ? []
         : await collection
-            .find({
-              $and: [
-                {
-                  sessionId
-                },
-                mongodbQuery.query
-              ]
-            })
-            .project(mongodbQuery.projection)
-            .skip(mongodbQuery.skip || 0)
-            .limit(mongodbQuery.limit || 0)
-            .sort(mongodbQuery.sort)
-            .toArray();
+          .find({
+            $and: [
+              {
+                sessionId
+              },
+              mongodbQuery.query
+            ]
+          })
+          .project(mongodbQuery.projection)
+          .skip(mongodbQuery.skip || 0)
+          .limit(mongodbQuery.limit || 0)
+          .sort(mongodbQuery.sort)
+          .toArray();
     if (mongodbQuery.inlinecount) {
       items.inlinecount = await collection
         .find({
@@ -216,19 +218,19 @@ export class SessionController extends ODataController {
       typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
         ? []
         : await collection
-            .find({
-              $and: [
-                {
-                  sessionId
-                },
-                mongodbQuery.query
-              ]
-            })
-            .project(mongodbQuery.projection)
-            .skip(mongodbQuery.skip || 0)
-            .limit(mongodbQuery.limit || 0)
-            .sort(mongodbQuery.sort)
-            .toArray();
+          .find({
+            $and: [
+              {
+                sessionId
+              },
+              mongodbQuery.query
+            ]
+          })
+          .project(mongodbQuery.projection)
+          .skip(mongodbQuery.skip || 0)
+          .limit(mongodbQuery.limit || 0)
+          .sort(mongodbQuery.sort)
+          .toArray();
     if (mongodbQuery.inlinecount) {
       items.inlinecount = await collection
         .find({

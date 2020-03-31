@@ -1,6 +1,7 @@
 import { ObjectID } from "mongodb";
 import { Edm, odata } from "odata-v4-server";
 import { SessionService } from "../service/SessionService";
+import { Balance } from "./Balance";
 import { Candle } from "./Candle";
 import { Order } from "./Order";
 import { Ticker } from "./Ticker";

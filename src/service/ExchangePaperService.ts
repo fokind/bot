@@ -8,45 +8,54 @@ import {
 } from "exchange-service";
 import moment from "moment";
 
-interface IOrder: {
-  public id?: string;
-  public side: string;
-  public quantity: number;
-  public price: number;
+interface IOrder {
+  id?: string;
+  side: string;
+  quantity: number;
+  price: number;
+  amount: number;
 }
 
-interface ITrade: {
-  public id?: string;
-  public time: string;
-  public side: string;
-  public quantity: number;
-  public price: number;
-  public amount: number;
+interface ITrade {
+  id?: string;
+  time: string;
+  side: string;
+  quantity: number;
+  price: number;
+  amount: number;
+}
+
+interface IBalanceItem {
+  currency: string;
+  available: number;
+  reserved: number;
 }
 
 export class ExchangePaperService extends EventEmitter {
   public exchange: string;
   public currency: string;
   public asset: string;
-//   public period: number;
+  public period: number;
+  private tickerStream: any;
+  private candlesStream: any;
   private currencyAvailable: number = 0;
   private currencyReserved: number = 0;
   private assetAvailable: number = 0;
   private assetReserved: number = 0;
-//   private _tickerStream: any;
-//   private _candlesStream: any;
+
+  private _order?: IOrder;
 
   constructor({
     exchange,
     currency,
     asset,
-    // period,
+    period,
     initialBalance
   }: {
     exchange: string;
     currency: string;
     asset: string;
-    // period: number;
+    period: number;
     initialBalance: number;
   }) {
     super();
@@ -54,38 +63,49 @@ export class ExchangePaperService extends EventEmitter {
       exchange,
       currency,
       asset,
-    //   period,
+      period,
       currencyAvailable: initialBalance
     });
   }
-  
-  private _order?: IOrder;
+
   public async getOrders(): Promise<IOrder[]> {
     return Promise.resolve([this._order]);
   }
 
   public async deleteOrders(): Promise<void> {
-      delete this._order;
+    delete this._order;
     return Promise.resolve();
   }
 
   public async getBalance(): Promise<IBalanceItem[]> {
     return Promise.resolve([
-        {
-            currency: this.currency,
-           available: this.currencyAvailable,
-           reserved: this.currencyReserved
-        },
-        {
-            currency: this.asset,
-           available: this.assetAvailable,
-           reserved: this.assetReserved
-        }
-        ]);
+      {
+        currency: this.currency,
+        available: this.currencyAvailable,
+        reserved: this.currencyReserved
+      },
+      {
+        currency: this.asset,
+        available: this.assetAvailable,
+        reserved: this.assetReserved
+      }
+    ]);
+  }
+
+  public async getCurrencyBalance(): Promise<IBalanceItem> {
+    return Promise.resolve({
+      currency: this.currency,
+      available: this.currencyAvailable,
+      reserved: this.currencyReserved
+    });
   }
 
   public async getCurrencyAvailable(): Promise<number> {
     return Promise.resolve(this.currencyAvailable);
+  }
+
+  public async getAssetAvailable(): Promise<number> {
+    return Promise.resolve(this.assetAvailable);
   }
 
   public async getTicker(): Promise<ITicker> {
@@ -95,28 +115,6 @@ export class ExchangePaperService extends EventEmitter {
       currency,
       asset
     });
-  }
-  
-  private _completeOrder() {
-      const time = moment.utc().toISOString();
-      const { side, price, amount, quantity } = this._order;
-    if (side === "buy") {
-        this.currencyReserved -= amount;
-        this.assetAvailable += quantity;
-      } else {
-        this.assetReserved -= quantity;
-        this.currencyAvailable += amount;
-      }
-      
-      delete this._order;
-
-      this.emit("trade", {
-          time,
-          side,
-          price,
-          quantity,
-          amount
-      } as ITrade);
   }
 
   public async createOrder({
@@ -155,7 +153,7 @@ export class ExchangePaperService extends EventEmitter {
   }
 
   public async stopTicker(): Promise<void> {
-    const tickerStream = this._tickerStream;
+    const tickerStream = this.tickerStream;
     return new Promise(resolve => {
       tickerStream.on("close", resolve);
       tickerStream.destroy();
@@ -163,7 +161,7 @@ export class ExchangePaperService extends EventEmitter {
   }
 
   public async stopCandles(): Promise<void> {
-    const candlesStream = this._candlesStream;
+    const candlesStream = this.candlesStream;
     return new Promise(resolve => {
       candlesStream.on("close", resolve);
       candlesStream.destroy();
@@ -176,14 +174,14 @@ export class ExchangePaperService extends EventEmitter {
 
   public startTicker() {
     const { exchange, currency, asset } = this;
-    let tickerStream = this._tickerStream;
+    let tickerStream = this.tickerStream;
     if (!tickerStream) {
       tickerStream = liveTicker({
         exchange,
         currency,
         asset
       });
-      this._tickerStream = tickerStream;
+      this.tickerStream = tickerStream;
       tickerStream.on("data", (ticker: ITicker) => {
         this.emit("ticker", ticker);
       });
@@ -192,7 +190,7 @@ export class ExchangePaperService extends EventEmitter {
 
   public startCandles() {
     const { exchange, currency, asset, period } = this;
-    let candlesStream = this._candlesStream;
+    let candlesStream = this.candlesStream;
     if (!candlesStream) {
       candlesStream = liveCandles({
         exchange,
@@ -200,7 +198,7 @@ export class ExchangePaperService extends EventEmitter {
         asset,
         period
       });
-      this._candlesStream = candlesStream;
+      this.candlesStream = candlesStream;
       candlesStream.on("data", (candles: ICandle[]) => {
         this.emit("candles", candles);
       });
@@ -210,5 +208,27 @@ export class ExchangePaperService extends EventEmitter {
   public start() {
     this.startTicker();
     this.startCandles();
+  }
+
+  private _completeOrder() {
+    const time = moment.utc().toISOString();
+    const { side, price, amount, quantity } = this._order;
+    if (side === "buy") {
+      this.currencyReserved -= amount;
+      this.assetAvailable += quantity;
+    } else {
+      this.assetReserved -= quantity;
+      this.currencyAvailable += amount;
+    }
+
+    delete this._order;
+
+    this.emit("trade", {
+      time,
+      side,
+      price,
+      quantity,
+      amount
+    } as ITrade);
   }
 }
