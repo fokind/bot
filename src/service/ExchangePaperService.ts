@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 import {
-  getTicker,
+  ExchangeService as ExternalExchangeService,
   ICandle,
   ITicker,
   liveCandles,
@@ -32,6 +32,14 @@ interface IBalanceItem {
 }
 
 export class ExchangePaperService extends EventEmitter {
+  public static async getTicker(options: {
+    exchange: string;
+    currency: string;
+    asset: string;
+  }): Promise<ITicker> {
+    return ExternalExchangeService.getTicker(options);
+  }
+
   public exchange: string;
   public currency: string;
   public asset: string;
@@ -42,6 +50,7 @@ export class ExchangePaperService extends EventEmitter {
   private currencyReserved: number = 0;
   private assetAvailable: number = 0;
   private assetReserved: number = 0;
+  private exchangeService: ExternalExchangeService;
 
   private _order?: IOrder;
 
@@ -59,6 +68,19 @@ export class ExchangePaperService extends EventEmitter {
     initialBalance: number;
   }) {
     super();
+
+    const exchangeService = new ExternalExchangeService({
+      exchange,
+      currency,
+      asset,
+      period
+    });
+
+    exchangeService.onTicker(this.tickerHandler);
+    exchangeService.onCandles(this.candlesHandler);
+
+    this.exchangeService = exchangeService;
+
     Object.assign(this, {
       exchange,
       currency,
@@ -109,12 +131,7 @@ export class ExchangePaperService extends EventEmitter {
   }
 
   public async getTicker(): Promise<ITicker> {
-    const { exchange, currency, asset } = this;
-    return getTicker({
-      exchange,
-      currency,
-      asset
-    });
+    return this.exchangeService.getTicker();
   }
 
   public async createOrder({
@@ -230,5 +247,15 @@ export class ExchangePaperService extends EventEmitter {
       quantity,
       amount
     } as ITrade);
+  }
+
+  private tickerHandler(ticker: ITicker) {
+    console.log(ticker);
+    // UNDONE
+  }
+
+  private candlesHandler(candles: ICandle[]) {
+    console.log(candles);
+    // UNDONE
   }
 }
