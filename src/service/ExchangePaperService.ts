@@ -69,18 +69,6 @@ export class ExchangePaperService extends EventEmitter {
   }) {
     super();
 
-    const exchangeService = new ExternalExchangeService({
-      exchange,
-      currency,
-      asset,
-      period
-    });
-
-    exchangeService.onTicker(this.tickerHandler);
-    exchangeService.onCandles(this.candlesHandler);
-
-    this.exchangeService = exchangeService;
-
     Object.assign(this, {
       exchange,
       currency,
@@ -131,7 +119,7 @@ export class ExchangePaperService extends EventEmitter {
   }
 
   public async getTicker(): Promise<ITicker> {
-    return this.exchangeService.getTicker();
+    return Promise.reject();
   }
 
   public async createOrder({

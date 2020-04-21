@@ -1,11 +1,6 @@
-import { ObjectID } from "mongodb";
 import { Edm } from "odata-v4-server";
 
 export class Candle {
-  @Edm.Computed
-  @Edm.String
-  public _id: ObjectID;
-
   @Edm.Key
   @Edm.String
   public exchange: string;
