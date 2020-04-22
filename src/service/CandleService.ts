@@ -31,14 +31,14 @@ export class CandleService {
         asset: string;
         period: number;
     }) {
-        // const stream = ExchangeService.getCandleStream(options); // UNDONE
-        // CandleService.streams.push({
-        //     key: options,
-        //     stream,
-        // });
-        // stream.on("data", (candle: ICandle) => {
-        //     EventBus.emitCandle(candle);
-        // });
+        const stream = ExchangeService.getCandleStream(options);
+        CandleService.streams.push({
+            key: options,
+            stream,
+        });
+        stream.on("data", (candle: ICandle) => {
+            EventBus.emitCandle(candle);
+        });
     }
 
     public static async unsubscribe({
