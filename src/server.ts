@@ -1,7 +1,6 @@
 import { EventEmitter } from "events";
 import { odata, ODataServer } from "odata-v4-server";
 import { AccountController } from "./controller/Account";
-import { BalanceController } from "./controller/Balance";
 import { CandleController } from "./controller/Candle";
 import { CandleSourceController } from "./controller/CandleSource";
 import { SessionController } from "./controller/Session";
@@ -11,7 +10,6 @@ import { TickerSourceController } from "./controller/TickerSource";
 @odata.cors
 @odata.namespace("Bot")
 @odata.controller(AccountController, true)
-@odata.controller(BalanceController, true)
 @odata.controller(CandleController, true)
 @odata.controller(CandleSourceController, true)
 @odata.controller(SessionController, true)
