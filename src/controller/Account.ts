@@ -4,15 +4,14 @@ import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
 import connect from "../connect";
 import { Account } from "../model/Account";
 import { Balance } from "../model/Balance";
+import { Order } from "../model/Order";
+import { AccountService } from "../service/AccountService";
 
 const collectionName = "account";
 
 @odata.type(Account)
 @Edm.EntitySet("Account")
 export class AccountController extends ODataController {
-    @(odata.POST("Balance").$ref)
-    @(odata.PATCH("Balance").$ref)
-    @(odata.DELETE("Balance").$ref)
     @odata.GET
     public async get(@odata.query query: ODataQuery): Promise<Account[]> {
         const mongodbQuery = createQuery(query);
@@ -98,6 +97,9 @@ export class AccountController extends ODataController {
         @odata.query query: ODataQuery
     ): Promise<Balance[]> {
         const accountId = new ObjectID(result._id);
+        const orders = AccountService.orders.filter((e) =>
+            e.accountId.equals(accountId)
+        );
         const mongodbQuery = createQuery(query);
         const collection = (await connect())
             .collection("balance")
@@ -117,11 +119,28 @@ export class AccountController extends ODataController {
                       .skip(mongodbQuery.skip || 0)
                       .limit(mongodbQuery.limit || 0)
                       .sort(mongodbQuery.sort)
-                      .map((e) => new Balance(e))
+                      .map((e) => {
+                          const order = orders.find(
+                              (o) => o.currency === e.currency
+                          );
+                          if (order) {
+                              e.available = e.available - order.quantity;
+                              e.reserved = order.quantity;
+                          }
+                          return new Balance(e);
+                      })
                       .toArray();
         if (mongodbQuery.inlinecount) {
             items.inlinecount = await collection.count(false);
         }
         return items;
+    }
+
+    @odata.GET("Orders")
+    public getOrders(@odata.result result: any): Order[] {
+        const accountId = new ObjectID(result._id);
+        return AccountService.orders.filter((e) =>
+            e.accountId.equals(accountId)
+        );
     }
 }

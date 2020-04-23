@@ -2,6 +2,7 @@ import { ObjectID } from "mongodb";
 import { Edm, odata } from "odata-v4-server";
 import { AccountService } from "../service/AccountService";
 import { Balance } from "./Balance";
+import { Order } from "./Order";
 
 export class Account {
     @Edm.Key
@@ -14,6 +15,9 @@ export class Account {
 
     @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Balance)))
     public Balance: Balance;
+
+    @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Order)))
+    public Orders: Order;
 
     constructor(data: any) {
         Object.assign(this, data);
@@ -31,15 +35,18 @@ export class Account {
         return await AccountService.makeDeposit(result._id, body);
     }
 
-    // createOrder
-    // создается ордер, изменяется баланс
-    // ордер должен исполнится, если цена подходящая
-    // при исполнении ордера создается трейд и меняется баланс
-    // список ордеров можно получить
-    // ордеры можно удалить, это повлияет на баланс
-    // трейды можно получить списком
-    // трейды удалить нельзя
-    // более сложные операции не выполняются
-    // должен ли баланс храниться в базе данных? если он может быть получен суммой операций
-    // может ли баланс изменяться напрямую
+    @Edm.Action
+    public async createOrder(
+        @odata.result result: any,
+        @odata.body
+        body: {
+            currency: string;
+            asset: string;
+            side: string;
+            price: number;
+            quantity: number;
+        }
+    ): Promise<void> {
+        await AccountService.createOrder(result._id, body);
+    }
 }

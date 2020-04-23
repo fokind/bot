@@ -1,7 +1,10 @@
 import { ObjectID } from "mongodb";
 import connect from "../connect";
+import { Order } from "../model/Order";
 
 export class AccountService {
+    public static orders: Order[] = [];
+
     public static async makeDeposit(
         accountId: string,
         {
@@ -37,5 +40,28 @@ export class AccountService {
                 accountId: oAccountId,
             });
         }
+    }
+
+    public static async createOrder(
+        accountId: string,
+        options: {
+            currency: string;
+            asset: string;
+            side: string;
+            price: number;
+            quantity: number;
+        }
+    ): Promise<Order> {
+        const order = new Order(
+            Object.assign(
+                {
+                    accountId: new ObjectID(accountId),
+                },
+                options
+            )
+        );
+        AccountService.orders.push(order);
+
+        return Promise.resolve(order);
     }
 }
