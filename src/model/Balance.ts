@@ -2,21 +2,24 @@ import { ObjectID } from "mongodb";
 import { Edm } from "odata-v4-server";
 
 export class Balance {
-  @Edm.Computed
-  @Edm.String
-  public _id: ObjectID;
+    @Edm.Key
+    @Edm.Computed
+    @Edm.String
+    public _id: ObjectID;
 
-  @Edm.Key
-  @Edm.String
-  public currency: string;
+    @Edm.String
+    public currency: string;
 
-  @Edm.Double
-  public available: number;
+    @Edm.Double
+    public available: number = 0;
 
-  @Edm.Double
-  public reserved: number;
+    @Edm.Double
+    public reserved: number = 0;
 
-  constructor(data: any) {
-    Object.assign(this, data);
-  }
+    @Edm.String
+    public accountId: ObjectID;
+
+    constructor(data: any) {
+        Object.assign(this, data);
+    }
 }
