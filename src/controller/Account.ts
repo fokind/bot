@@ -5,13 +5,17 @@ import connect from "../connect";
 import { Account } from "../model/Account";
 import { Balance } from "../model/Balance";
 import { Order } from "../model/Order";
-import { AccountService } from "../service/AccountService";
 
 const collectionName = "account";
 
 @odata.type(Account)
 @Edm.EntitySet("Account")
 export class AccountController extends ODataController {
+    @(odata.POST("Balance").$ref)
+    @(odata.PATCH("Balance").$ref)
+    @(odata.DELETE("Balance").$ref)
+    @(odata.POST("Orders").$ref)
+    @(odata.DELETE("Orders").$ref)
     @odata.GET
     public async get(@odata.query query: ODataQuery): Promise<Account[]> {
         const mongodbQuery = createQuery(query);
@@ -97,9 +101,6 @@ export class AccountController extends ODataController {
         @odata.query query: ODataQuery
     ): Promise<Balance[]> {
         const accountId = new ObjectID(result._id);
-        const orders = AccountService.orders.filter((e) =>
-            e.accountId.equals(accountId)
-        );
         const mongodbQuery = createQuery(query);
         const collection = (await connect())
             .collection("balance")
@@ -119,16 +120,7 @@ export class AccountController extends ODataController {
                       .skip(mongodbQuery.skip || 0)
                       .limit(mongodbQuery.limit || 0)
                       .sort(mongodbQuery.sort)
-                      .map((e) => {
-                          const order = orders.find(
-                              (o) => o.currency === e.currency
-                          );
-                          if (order) {
-                              e.available = e.available - order.quantity;
-                              e.reserved = order.quantity;
-                          }
-                          return new Balance(e);
-                      })
+                      .map((e) => new Balance(e))
                       .toArray();
         if (mongodbQuery.inlinecount) {
             items.inlinecount = await collection.count(false);
@@ -137,10 +129,35 @@ export class AccountController extends ODataController {
     }
 
     @odata.GET("Orders")
-    public getOrders(@odata.result result: any): Order[] {
+    public async getOrders(
+        @odata.result result: any,
+        @odata.query query: ODataQuery
+    ): Promise<Order[]> {
         const accountId = new ObjectID(result._id);
-        return AccountService.orders.filter((e) =>
-            e.accountId.equals(accountId)
-        );
+        const mongodbQuery = createQuery(query);
+        const collection = (await connect())
+            .collection("order")
+            .find({
+                $and: [
+                    {
+                        accountId,
+                    },
+                    mongodbQuery.query,
+                ],
+            })
+            .project(mongodbQuery.projection);
+        const items: Order[] & { inlinecount?: number } =
+            typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
+                ? []
+                : await collection
+                      .skip(mongodbQuery.skip || 0)
+                      .limit(mongodbQuery.limit || 0)
+                      .sort(mongodbQuery.sort)
+                      .map((e) => new Order(e))
+                      .toArray();
+        if (mongodbQuery.inlinecount) {
+            items.inlinecount = await collection.count(false);
+        }
+        return items;
     }
 }
