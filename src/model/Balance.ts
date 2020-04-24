@@ -13,9 +13,6 @@ export class Balance {
     @Edm.Double
     public available: number = 0;
 
-    @Edm.Double
-    public reserved: number = 0;
-
     @Edm.String
     public accountId: ObjectID;
 

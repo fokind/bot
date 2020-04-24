@@ -5,6 +5,7 @@ import connect from "../connect";
 import { Account } from "../model/Account";
 import { Balance } from "../model/Balance";
 import { Order } from "../model/Order";
+import { Trade } from "../model/Trade";
 
 const collectionName = "account";
 
@@ -15,7 +16,6 @@ export class AccountController extends ODataController {
     @(odata.PATCH("Balance").$ref)
     @(odata.DELETE("Balance").$ref)
     @(odata.POST("Orders").$ref)
-    @(odata.DELETE("Orders").$ref)
     @odata.GET
     public async get(@odata.query query: ODataQuery): Promise<Account[]> {
         const mongodbQuery = createQuery(query);
@@ -154,6 +154,39 @@ export class AccountController extends ODataController {
                       .limit(mongodbQuery.limit || 0)
                       .sort(mongodbQuery.sort)
                       .map((e) => new Order(e))
+                      .toArray();
+        if (mongodbQuery.inlinecount) {
+            items.inlinecount = await collection.count(false);
+        }
+        return items;
+    }
+
+    @odata.GET("Trades")
+    public async getTrades(
+        @odata.result result: any,
+        @odata.query query: ODataQuery
+    ): Promise<Trade[]> {
+        const accountId = new ObjectID(result._id);
+        const mongodbQuery = createQuery(query);
+        const collection = (await connect())
+            .collection("trade")
+            .find({
+                $and: [
+                    {
+                        accountId,
+                    },
+                    mongodbQuery.query,
+                ],
+            })
+            .project(mongodbQuery.projection);
+        const items: Trade[] & { inlinecount?: number } =
+            typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
+                ? []
+                : await collection
+                      .skip(mongodbQuery.skip || 0)
+                      .limit(mongodbQuery.limit || 0)
+                      .sort(mongodbQuery.sort)
+                      .map((e) => new Trade(e))
                       .toArray();
         if (mongodbQuery.inlinecount) {
             items.inlinecount = await collection.count(false);

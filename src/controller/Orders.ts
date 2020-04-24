@@ -1,9 +1,10 @@
+import moment from "moment";
 import { ObjectID } from "mongodb";
 import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
 import connect from "../connect";
-import { Balance } from "../model/Balance";
 import { Order } from "../model/Order";
+import { TickerService } from "../service/TickerService";
 
 const collectionName = "order";
 
@@ -65,72 +66,87 @@ export class OrdersController extends ODataController {
         @odata.body
         body: any
     ): Promise<Order> {
-        const result = new Order(body);
-        result.accountId = new ObjectID(body.accountId);
-        const { currency, quantity } = body;
+        const accountId = new ObjectID(body.accountId);
+        const { side, currency, asset, quantity } = body;
+        const result = new Order({
+            accountId,
+            side,
+            currency,
+            asset,
+            quantity,
+            active: false,
+        });
+
+        const { exchange }: { exchange: string } = await (await connect())
+            .collection("account")
+            .findOne({
+                _id: accountId,
+            });
+
+        const ticker = await TickerService.getTicker({
+            exchange,
+            currency,
+            asset,
+        });
+
+        const price = side === "buy" ? ticker.ask : ticker.bid;
 
         const collectionBalance = (await connect()).collection("balance");
-        const balance = new Balance(
-            await collectionBalance.findOne({
-                accountId: result.accountId,
-                currency,
-            })
-        );
-
-        balance.available = balance.available - quantity;
-        balance.reserved = quantity;
+        const balanceCurrency = await collectionBalance.findOne({
+            accountId,
+            currency,
+        });
+        const amount = quantity * price;
+        balanceCurrency.available =
+            side === "buy"
+                ? balanceCurrency.available - amount
+                : balanceCurrency.available + amount;
 
         await collectionBalance.updateOne(
-            { _id: balance._id },
+            { _id: balanceCurrency._id },
             {
                 $set: {
-                    available: balance.available,
-                    reserved: balance.reserved,
+                    available: balanceCurrency.available,
+                },
+            }
+        );
+
+        const balanceAsset = await collectionBalance.findOne({
+            accountId,
+            currency: asset,
+        });
+
+        balanceAsset.available =
+            side === "buy"
+                ? balanceAsset.available + quantity
+                : balanceAsset.available - quantity;
+
+        await collectionBalance.updateOne(
+            { _id: balanceAsset._id },
+            {
+                $set: {
+                    available: balanceAsset.available,
                 },
             }
         );
 
         const collection = await (await connect()).collection(collectionName);
         result._id = (await collection.insertOne(result)).insertedId;
+
+        const trade = {
+            currency,
+            asset,
+            time: moment.utc().toISOString(),
+            side,
+            quantity,
+            price,
+            amount,
+            accountId,
+        };
+
+        const collectionTrade = await (await connect()).collection("trade");
+        await collectionTrade.insertOne(trade);
+
         return result;
-    }
-
-    @odata.DELETE
-    public async remove(@odata.key key: string): Promise<number> {
-        const _id = new ObjectID(key);
-
-        const collection = (await connect()).collection(collectionName);
-        const { accountId, currency, quantity } = new Order(
-            await collection.findOne({
-                _id,
-            })
-        );
-
-        const collectionBalance = (await connect()).collection("balance");
-        const balance = new Balance(
-            await collectionBalance.findOne({
-                accountId,
-                currency,
-            })
-        );
-
-        // зарезервировать: уменьшить количество, установить резерв
-        balance.available = balance.available + quantity;
-        balance.reserved = 0;
-
-        // сохранить
-        await collectionBalance.updateOne(
-            { _id: balance._id },
-            {
-                $set: {
-                    available: balance.available,
-                    reserved: balance.reserved,
-                },
-            }
-        );
-
-        return collection
-            .deleteOne({ _id })
-            .then((result) => result.deletedCount);
     }
 }

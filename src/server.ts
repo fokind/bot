@@ -8,6 +8,7 @@ import { OrdersController } from "./controller/Orders";
 import { SessionController } from "./controller/Session";
 import { TickerController } from "./controller/Ticker";
 import { TickerSourceController } from "./controller/TickerSource";
+import { TradesController } from "./controller/Trades";
 
 @odata.cors
 @odata.namespace("Bot")
@@ -19,6 +20,7 @@ import { TickerSourceController } from "./controller/TickerSource";
 @odata.controller(OrdersController, true)
 @odata.controller(TickerController, true)
 @odata.controller(TickerSourceController, true)
+@odata.controller(TradesController, true)
 export class BotServer extends ODataServer {
     public static eventBus = new EventEmitter();
 }
