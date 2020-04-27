@@ -1,4 +1,5 @@
 import { Edm, odata } from "odata-v4-server";
+import connect from "../connect";
 import { CandleService } from "../service/CandleService";
 import { EventBus } from "../service/EventBus";
 
@@ -21,6 +22,37 @@ export class CandleSource {
 
     constructor(data: any) {
         Object.assign(this, data);
+    }
+
+    @Edm.Action
+    public async update(@odata.result result: any, @odata.body body: any) {
+        const { exchange, currency, asset, period } = result;
+        const { begin, end } = body;
+
+        const collection = (await connect()).collection("candle");
+
+        (
+            await CandleService.getCandles({
+                exchange,
+                currency,
+                asset,
+                period,
+                begin,
+                end,
+            })
+        ).forEach(async (candle) => {
+            await collection.findOneAndUpdate(
+                {
+                    exchange,
+                    currency,
+                    asset,
+                    period,
+                    time: candle.time,
+                },
+                { $set: candle },
+                { upsert: true }
+            );
+        });
     }
 
     @Edm.Action
