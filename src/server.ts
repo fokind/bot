@@ -7,7 +7,7 @@ import { CandleController } from "./controller/Candle";
 import { CandleSourceController } from "./controller/CandleSource";
 import { OrdersController } from "./controller/Orders";
 import { SessionController } from "./controller/Session";
-import { StrategyCodesController } from "./controller/StrategyCodes";
+import { StrategiesController } from "./controller/Strategies";
 import { TickerController } from "./controller/Ticker";
 import { TickerSourceController } from "./controller/TickerSource";
 import { TradesController } from "./controller/Trades";
@@ -20,7 +20,7 @@ import { TradesController } from "./controller/Trades";
 @odata.controller(CandleController, true)
 @odata.controller(CandleSourceController, true)
 @odata.controller(SessionController, true)
-@odata.controller(StrategyCodesController, true)
+@odata.controller(StrategiesController, true)
 @odata.controller(OrdersController, true)
 @odata.controller(TickerController, true)
 @odata.controller(TickerSourceController, true)

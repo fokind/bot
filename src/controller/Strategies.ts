@@ -2,15 +2,15 @@ import { ObjectID } from "mongodb";
 import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
 import connect from "../connect";
-import { StrategyCode } from "../model/StrategyCode";
+import { Strategy } from "../model/Strategy";
 
-const collectionName = "strategyCode";
+const collectionName = "strategy";
 
-@odata.type(StrategyCode)
-@Edm.EntitySet("StrategyCodes")
-export class StrategyCodesController extends ODataController {
+@odata.type(Strategy)
+@Edm.EntitySet("Strategies")
+export class StrategiesController extends ODataController {
     @odata.GET
-    public async get(@odata.query query: ODataQuery): Promise<StrategyCode[]> {
+    public async get(@odata.query query: ODataQuery): Promise<Strategy[]> {
         const mongodbQuery = createQuery(query);
 
         if (mongodbQuery.query._id) {
@@ -22,14 +22,14 @@ export class StrategyCodesController extends ODataController {
             .find(mongodbQuery.query)
             .project(mongodbQuery.projection);
 
-        const result: StrategyCode[] & { inlinecount?: number } =
+        const result: Strategy[] & { inlinecount?: number } =
             typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
                 ? []
                 : await collection
                       .skip(mongodbQuery.skip || 0)
                       .limit(mongodbQuery.limit || 0)
                       .sort(mongodbQuery.sort)
-                      .map((e) => new StrategyCode(e))
+                      .map((e) => new Strategy(e))
                       .toArray();
 
         if (mongodbQuery.inlinecount) {
@@ -42,10 +42,10 @@ export class StrategyCodesController extends ODataController {
     public async getOne(
         @odata.key key: string,
         @odata.query query: ODataQuery
-    ): Promise<StrategyCode> {
+    ): Promise<Strategy> {
         const { projection } = createQuery(query);
         const _id = new ObjectID(key);
-        const result = new StrategyCode(
+        const result = new Strategy(
             await (await connect())
                 .collection(collectionName)
                 .findOne({ _id }, { projection })
@@ -57,8 +57,8 @@ export class StrategyCodesController extends ODataController {
     public async post(
         @odata.body
         body: any
-    ): Promise<StrategyCode> {
-        const result = new StrategyCode(body);
+    ): Promise<Strategy> {
+        const result = new Strategy(body);
         const collection = await (await connect()).collection(collectionName);
         result._id = (await collection.insertOne(result)).insertedId;
         return result;

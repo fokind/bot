@@ -1,7 +1,7 @@
 import { ObjectID } from "mongodb";
 import { Edm } from "odata-v4-server";
 
-export class StrategyCode {
+export class Strategy {
     @Edm.Key
     @Edm.Computed
     @Edm.String

@@ -3,6 +3,7 @@ import { Edm, odata } from "odata-v4-server";
 import connect from "../connect";
 import { AdvisorService } from "../service/AdvisorService";
 import { Candle } from "./Candle";
+import { Strategy } from "./Strategy";
 
 export class Advisor {
     @Edm.Key
@@ -31,7 +32,8 @@ export class Advisor {
 
     @Edm.Action
     public async calculate(@odata.result result: any, @odata.body body: any) {
-        const { exchange, currency, asset, period, strategyCodeId } = result;
+        const { exchange, currency, asset, period } = result;
+        const strategyCodeId = new ObjectID(result.strategyCodeId);
         const { begin, end } = body;
 
         // UNDONE после выполнения этого метода будут доступны советы в базе данных
@@ -41,7 +43,7 @@ export class Advisor {
         // выполнить расчет
         // сохранить в базу данных
         const db = await connect();
-        const candles: Cursor<Candle> = await db
+        const candles = await db
             .collection("candle")
             .find({
                 $and: [
@@ -60,12 +62,18 @@ export class Advisor {
                 ],
             })
             .sort({ time: 1 })
-            .map((e) => new Candle(e));
+            .map((e) => new Candle(e))
+            .toArray();
+
+        const { code } = new Strategy(
+            await db.collection("strategy").findOne({ _id: strategyCodeId })
+        );
+
+        const advices = await AdvisorService.getAdvices(candles, code);
 
         const collection = await db.collection("advice");
 
-        candles.forEach(async (candle) => {
-            const advice = await AdvisorService.getAdvice();
+        advices.forEach(async ({ time, side }) => {
             await collection.findOneAndUpdate(
                 {
                     exchange,
@@ -73,7 +81,7 @@ export class Advisor {
                     asset,
                     period,
                     strategyCodeId,
-                    time: candle.time,
+                    time,
                 },
                 {
                     $set: {
@@ -82,8 +90,8 @@ export class Advisor {
                         asset,
                         period,
                         strategyCodeId,
-                        time: candle.time,
-                        advice,
+                        time,
+                        side,
                     },
                 },
                 { upsert: true }
