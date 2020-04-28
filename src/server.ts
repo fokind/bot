@@ -5,6 +5,7 @@ import { AdvisorsController } from "./controller/Advisors";
 import { BalanceController } from "./controller/Balance";
 import { CandleController } from "./controller/Candle";
 import { CandleSourceController } from "./controller/CandleSource";
+import { IndicatorInputsController } from "./controller/IndicatorInputs";
 import { OrdersController } from "./controller/Orders";
 import { SessionController } from "./controller/Session";
 import { StrategiesController } from "./controller/Strategies";
@@ -19,6 +20,7 @@ import { TradesController } from "./controller/Trades";
 @odata.controller(BalanceController, true)
 @odata.controller(CandleController, true)
 @odata.controller(CandleSourceController, true)
+@odata.controller(IndicatorInputsController, true)
 @odata.controller(SessionController, true)
 @odata.controller(StrategiesController, true)
 @odata.controller(OrdersController, true)

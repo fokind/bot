@@ -1,11 +1,9 @@
-import { ObjectID } from "mongodb";
 import { Edm, odata } from "odata-v4-server";
 import connect from "../connect";
-import { AdvisorService } from "../service/AdvisorService";
+import { IndicatorService } from "../service/IndicatorService";
 import { Candle } from "./Candle";
-import { Strategy } from "./Strategy";
 
-export class Advisor {
+export class IndicatorInput {
     @Edm.Key
     @Edm.String
     public exchange: string;
@@ -24,24 +22,32 @@ export class Advisor {
 
     @Edm.Key
     @Edm.String
-    public strategyCodeId: ObjectID;
+    public name: string; // из фиксированного списка tulind
+
+    @Edm.Key
+    @Edm.String
+    public options: string; // должен парситься в массив чисел
 
     constructor(data: any) {
         Object.assign(this, data);
     }
 
     @Edm.Action
-    public async calculate(@odata.result result: any, @odata.body body: any) {
-        const { exchange, currency, asset, period } = result;
-        const strategyCodeId = new ObjectID(result.strategyCodeId);
+    public async calculate(
+        @odata.result
+        result: {
+            exchange: string;
+            currency: string;
+            asset: string;
+            period: number;
+            name: string;
+            options: string;
+        },
+        @odata.body body: { begin: string; end: string }
+    ) {
+        const { exchange, currency, asset, period, name, options } = result;
         const { begin, end } = body;
 
-        // UNDONE после выполнения этого метода будут доступны советы в базе данных
-        // в режиме реального времени можно аналогично
-
-        // загрузить свечи из базы данных, они должны быть импортированы из источника данных?
-        // выполнить расчет
-        // сохранить в базу данных
         const db = await connect();
         const candles = await db
             .collection("candle")
@@ -65,22 +71,25 @@ export class Advisor {
             .map((e) => new Candle(e))
             .toArray();
 
-        const { code } = new Strategy(
-            await db.collection("strategy").findOne({ _id: strategyCodeId })
+        const parsedOptions: number[] = JSON.parse(`[${options}]`);
+
+        const indicators = await IndicatorService.getIndicators(
+            candles,
+            name,
+            parsedOptions
         );
 
-        const advices = await AdvisorService.getAdvices(candles, code);
+        const collection = await db.collection("indicator");
 
-        const collection = await db.collection("advice");
-
-        advices.forEach(async ({ time, side }) => {
+        indicators.forEach(async ({ time, values }) => {
             await collection.findOneAndUpdate(
                 {
                     exchange,
                     currency,
                     asset,
                     period,
-                    strategyCodeId,
+                    name,
+                    options,
                     time,
                 },
                 {
@@ -89,9 +98,10 @@ export class Advisor {
                         currency,
                         asset,
                         period,
-                        strategyCodeId,
+                        name,
+                        options,
                         time,
-                        side,
+                        values,
                     },
                 },
                 { upsert: true }
