@@ -1,6 +1,6 @@
 import { Edm } from "odata-v4-server";
 
-export class Advice {
+export class Indicator {
     // некоторые поля временные, для построения индикатора только на основе свечей
     @Edm.Key
     @Edm.String
