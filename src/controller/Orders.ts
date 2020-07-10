@@ -61,6 +61,15 @@ export class OrdersController extends ODataController {
         return result;
     }
 
+    @odata.DELETE
+    public async remove(@odata.key key: string): Promise<number> {
+        const _id = new ObjectID(key);
+        return (await connect())
+            .collection(collectionName)
+            .deleteOne({ _id })
+            .then((result) => result.deletedCount);
+    }
+
     @odata.POST
     public async post(
         @odata.body

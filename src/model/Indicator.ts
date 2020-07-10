@@ -1,6 +1,7 @@
 import { Edm } from "odata-v4-server";
+import { IIndicator } from "../service/IndicatorService";
 
-export class Indicator {
+export class Indicator implements IIndicator {
     // некоторые поля временные, для построения индикатора только на основе свечей
     @Edm.Key
     @Edm.String

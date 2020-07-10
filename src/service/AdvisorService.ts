@@ -1,5 +1,5 @@
 import { ICandle } from "exchange-service";
-import * as tulind from "tulind";
+import { IIndicator } from "./IndicatorService";
 
 interface IAdvice {
     time: string;
@@ -9,14 +9,15 @@ interface IAdvice {
 export class AdvisorService {
     public static async getAdvices(
         candles: ICandle[],
+        indicators: IIndicator[],
         strategyCode: string
     ): Promise<IAdvice[]> {
         const strategyFunction = new Function(
-            "tulind",
             "candles",
+            "indicators",
             strategyCode
-        ) as (tulind: any, candles: ICandle[]) => Promise<IAdvice[]>;
+        ) as (candles: ICandle[], indicators: IIndicator[]) => Promise<IAdvice[]>;
 
-        return strategyFunction(tulind, candles);
+        return strategyFunction(candles, indicators);
     }
 }

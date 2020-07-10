@@ -3,28 +3,33 @@ import { Edm, odata } from "odata-v4-server";
 import connect from "../connect";
 import { AdvisorService } from "../service/AdvisorService";
 import { Candle } from "./Candle";
+import { Indicator } from "./Indicator";
+import { IndicatorInput } from "./IndicatorInput";
 import { Strategy } from "./Strategy";
 
 export class Advisor {
     @Edm.Key
+    @Edm.Computed
+    @Edm.String
+    public _id: ObjectID;
+
     @Edm.String
     public exchange: string;
 
-    @Edm.Key
     @Edm.String
     public currency: string;
 
-    @Edm.Key
     @Edm.String
     public asset: string;
 
-    @Edm.Key
     @Edm.Double
     public period: number;
 
-    @Edm.Key
     @Edm.String
     public strategyCodeId: ObjectID;
+
+    @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => IndicatorInput)))
+    public IndicatorInputs: IndicatorInput[];
 
     constructor(data: any) {
         Object.assign(this, data);
@@ -65,11 +70,31 @@ export class Advisor {
             .map((e) => new Candle(e))
             .toArray();
 
-        const { code } = new Strategy(
-            await db.collection("strategy").findOne({ _id: strategyCodeId })
-        );
+        const indicators = await db
+            .collection("indicator")
+            .find({
+                $and: [
+                    {
+                        exchange,
+                        currency,
+                        asset,
+                        period,
+                    },
+                    {
+                        time: { $gte: begin },
+                    },
+                    {
+                        time: { $lte: end },
+                    },
+                ],
+            })
+            .sort({ time: 1 })
+            .map((e) => new Indicator(e))
+            .toArray();
 
-        const advices = await AdvisorService.getAdvices(candles, code);
+        const { code } = await db.collection("strategy").findOne({ _id: strategyCodeId }) as Strategy;
+
+        const advices = await AdvisorService.getAdvices(candles, indicators, code);
 
         const collection = await db.collection("advice");
 
