@@ -7,6 +7,13 @@ export interface IIndicator {
 }
 
 export class IndicatorService {
+    public static getStart(
+        name: string,
+        options: number[]
+    ): number {
+        return tulind.indicators[name].start(options) as number;
+    }
+
     public static async getIndicators(
         candles: ICandle[],
         name: string,

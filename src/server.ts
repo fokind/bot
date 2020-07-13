@@ -9,6 +9,8 @@ import { CandleSourceController } from "./controller/CandleSource";
 import { CandleStreamController } from "./controller/CandleStream";
 import { IndicatorController } from "./controller/Indicator";
 import { IndicatorInputsController } from "./controller/IndicatorInputs";
+import { IndicatorStreamInputController } from "./controller/IndicatorStreamInputs";
+import { IndicatorStreamController } from "./controller/IndicatorStreams";
 import { OrdersController } from "./controller/Orders";
 import { SessionController } from "./controller/Session";
 import { StrategiesController } from "./controller/Strategies";
@@ -28,6 +30,8 @@ import { TradesController } from "./controller/Trades";
 @odata.controller(CandleStreamController, true)
 @odata.controller(IndicatorController, true)
 @odata.controller(IndicatorInputsController, true)
+@odata.controller(IndicatorStreamInputController, true)
+@odata.controller(IndicatorStreamController, true)
 @odata.controller(SessionController, true)
 @odata.controller(StrategiesController, true)
 @odata.controller(OrdersController, true)
