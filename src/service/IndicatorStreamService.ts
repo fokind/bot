@@ -3,15 +3,24 @@ import { ExchangeService, ICandle } from "exchange-service";
 import { Readable } from "stream";
 import { IndicatorService } from "./IndicatorService";
 
-export interface IIndicatorInput {
+interface IIndicatorInput {
     name: string;
     options: number[];
 }
 
+interface IIndicator extends IIndicatorInput {
+    outputs: number[];
+}
+
+interface IDataItem {
+    candle: ICandle;
+    indicators: IIndicator[];
+}
+
 function calculateIndicators(
     candles: ICandle[],
-    indicatorInputs: Array<{ name: string; options: number[] }>
-): Promise<Array<{ name: string; options: number[]; outputs: number[] }>> {
+    indicatorInputs: IIndicatorInput[]
+): Promise<IIndicator[]> {
     // выполнить вычисление всех индикаторов
     return Promise.all(
         indicatorInputs.map(
@@ -56,22 +65,58 @@ function calculateIndicators(
 export class IndicatorStreamService extends EventEmitter {
     public static _instances: IndicatorStreamService[] = [];
 
-    public static async start(options: {
+    public static createInstance(options: {
         key: string;
         exchange: string;
         currency: string;
         asset: string;
         period: number;
         indicatorInputs: IIndicatorInput[];
-    }): Promise<IndicatorStreamService> {
+    }): IndicatorStreamService {
+        const instance = new IndicatorStreamService(options);
+        IndicatorStreamService._instances.push(instance);
+        return instance;
+    }
+
+    public static async stop(key: string): Promise<number> {
+        const instances = IndicatorStreamService._instances;
+        const index = instances.findIndex((e) => e.key === key);
+        let modifiedCount = 0;
+        if (index !== -1) {
+            modifiedCount = 1;
+            const { stream } = instances.splice(index)[0];
+            await new Promise((resolve) => {
+                stream.on("close", () => resolve());
+                stream.destroy();
+            });
+        }
+        return modifiedCount;
+    }
+
+    public key: string;
+    public stream: Readable;
+    public exchange: string;
+    public currency: string;
+    public asset: string;
+    public period: number;
+    public indicatorInputs: IIndicatorInput[];
+    public queue: Array<{
+        time: string;
+        candle: ICandle;
+    }> = [];
+
+    private constructor(data: any) {
+        super();
+        Object.assign(this, data);
+    }
+
+    public async start(): Promise<IndicatorStreamService> {
+        const options = this;
+        console.log(options);
         const stream = ExchangeService.getCandleStream(options);
+        this.stream = stream;
         const { key, indicatorInputs } = options;
-        const instance = new IndicatorStreamService({
-            key,
-            stream,
-            indicatorInputs,
-            queue: [],
-        });
+        const instance = this;
 
         stream.on("data", (candle: ICandle) => {
             // FIXME на самом старте выполняется асинхронная обработка всех свечей сразу из-за чего индикаторы при первом расчете могут иметь пропуски
@@ -109,7 +154,10 @@ export class IndicatorStreamService extends EventEmitter {
             // здесь подписка на него
             // по подписке выполняется сохранение в базе данных
             calculateIndicators(candles, indicatorInputs).then((result) => {
-                console.log(candle, result);
+                instance._emitData({
+                    candle,
+                    indicators: result
+                });
             });
         });
 
@@ -117,31 +165,15 @@ export class IndicatorStreamService extends EventEmitter {
         return instance;
     }
 
-    public static async stop(key: string): Promise<number> {
-        const instances = IndicatorStreamService._instances;
-        const index = instances.findIndex((e) => e.key === key);
-        let modifiedCount = 0;
-        if (index !== -1) {
-            modifiedCount = 1;
-            const { stream } = instances.splice(index)[0];
-            await new Promise((resolve) => {
-                stream.on("close", () => resolve());
-                stream.destroy();
-            });
-        }
-        return modifiedCount;
+    public onData(listner: (data: IDataItem) => void) {
+        this.on("data", listner);
     }
 
-    public key: string;
-    public stream: Readable;
-    public indicatorInputs: IIndicatorInput[];
-    public queue: Array<{
-        time: string;
-        candle: ICandle;
-    }>;
+    public offData(listner: (data: IDataItem) => void) {
+        this.off("data", listner);
+    }
 
-    public constructor(data: any) {
-        super();
-        Object.assign(this, data);
+    private _emitData(data: IDataItem) {
+        this.emit("data", data);
     }
 }

@@ -128,10 +128,16 @@ export class DataStreamController extends ODataController {
                             options: JSON.parse(e.options) as number[],
                         }))
                         .toArray();
-                    await IndicatorStreamService.start(Object.assign({
+                    const indicatorStreamService = IndicatorStreamService.createInstance(Object.assign({
                         key: _id.toHexString(),
                         indicatorInputs
                     }, options));
+
+                    indicatorStreamService.onData((data) => {
+                        console.log(data);
+                    });
+
+                    await indicatorStreamService.start();
                 } else {
                     await IndicatorStreamService.stop(_id.toHexString());
                 }
