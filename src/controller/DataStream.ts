@@ -1,4 +1,3 @@
-import { ExchangeService, ICandle } from "exchange-service";
 import { ObjectID } from "mongodb";
 import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
@@ -6,13 +5,14 @@ import connect from "../connect";
 import { DataStream } from "../model/DataStream";
 import { DataStreamIndicatorInput } from "../model/DataStreamIndicatorInput";
 import { DataStreamItem } from "../model/DataStreamItem";
-import { IndicatorService } from "../service/IndicatorService";
+import { IndicatorStreamService } from "../service/IndicatorStreamService";
 
 const collectionName = "dataStream";
 
 function setActive(dataStream: DataStream): DataStream {
-    dataStream.active = !!DataStream._instances.find((e) => {
-        return e.key.equals(dataStream._id);
+    const key = dataStream._id.toHexString();
+    dataStream.active = !!IndicatorStreamService._instances.find((e) => {
+        return e.key === key;
     });
     return dataStream;
 }
@@ -114,86 +114,26 @@ export class DataStreamController extends ODataController {
             );
 
             if (active !== options.active) {
-                const instances = DataStream._instances;
                 if (active) {
-                    const stream = ExchangeService.getCandleStream(options);
-                    stream.on("data", async (candle: ICandle) => {
-                        // запись в базу данных
-                        const { exchange, currency, asset, period } = options;
-                        const db = await connect();
-                        const dataStreamItemCollection = await db.collection(
-                            "dataStreamItem"
-                        );
-                        await dataStreamItemCollection.findOneAndUpdate(
-                            {
-                                dataStreamId: _id,
-                                time: candle.time,
-                            },
-                            {
-                                $set: Object.assign(
-                                    {
-                                        dataStreamId: _id,
-                                    },
-                                    candle
-                                ),
-                            },
-                            { upsert: true }
-                        );
-
-                        // // выполнить вычисление всех индикаторов
-                        // await db
-                        //     .collection("indicatorStreamInput")
-                        //     .find({
-                        //         indicatorStreamId: _id,
-                        //     })
-                        //     .forEach(async (e: IndicatorStreamInput) => {
-                        //         const inputOptions = JSON.parse(e.options);
-                        //         const start =
-                        //             1 +
-                        //             IndicatorService.getStart(
-                        //                 e.name,
-                        //                 inputOptions
-                        //             );
-
-                        //         const candles = (
-                        //             await candleCollection
-                        //                 .find({
-                        //                     exchange,
-                        //                     currency,
-                        //                     asset,
-                        //                     period,
-                        //                 })
-                        //                 .sort({ time: -1 })
-                        //                 .limit(start)
-                        //                 .toArray()
-                        //         ).reverse();
-
-                        //         if (candles.length >= start) {
-                        //             const output = await IndicatorService.getIndicators(
-                        //                 candles,
-                        //                 e.name,
-                        //                 inputOptions
-                        //             );
-                        //             console.log(output); // FIXME время одинаковое
-                        //         }
-                        //     });
-
-                        // console.log(candle); // UNDONE пока просто пример использования
-                    });
-
-                    instances.push({
-                        key: _id,
-                        stream,
-                    });
+                    const indicatorInputs: Array<{
+                        name: string;
+                        options: number[];
+                    }> = await (await connect())
+                        .collection("dataStreamIndicatorInput")
+                        .find({
+                            dataStreamId: _id,
+                        })
+                        .map((e: { name: string; options: string }) => ({
+                            name: e.name,
+                            options: JSON.parse(e.options) as number[],
+                        }))
+                        .toArray();
+                    await IndicatorStreamService.start(Object.assign({
+                        key: _id.toHexString(),
+                        indicatorInputs
+                    }, options));
                 } else {
-                    const index = instances.findIndex((e) => e.key.equals(_id));
-                    if (index !== -1) {
-                        const { stream } = instances.splice(index)[0];
-                        await new Promise((resolve) => {
-                            stream.on("close", () => resolve());
-                            stream.destroy();
-                        });
-                    }
+                    await IndicatorStreamService.stop(_id.toHexString());
                 }
                 modifiedCount = 1;
             }

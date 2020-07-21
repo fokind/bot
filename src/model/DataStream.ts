@@ -1,15 +1,10 @@
+import { ICandle } from "exchange-service";
 import { ObjectID } from "mongodb";
 import { Edm } from "odata-v4-server";
-import { Readable } from "stream";
 import { DataStreamIndicatorInput } from "./DataStreamIndicatorInput";
 import { DataStreamItem } from "./DataStreamItem";
 
 export class DataStream {
-    public static _instances: Array<{
-        key: ObjectID;
-        stream: Readable;
-    }> = [];
-
     @Edm.Key
     @Edm.Computed
     @Edm.String
