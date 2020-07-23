@@ -66,6 +66,7 @@ export class DataStreamIndicatorInputController extends ODataController {
         @odata.body
         body: {
             dataStreamId: string;
+            key: string;
             name: string;
             options: string;
         }
@@ -85,6 +86,7 @@ export class DataStreamIndicatorInputController extends ODataController {
         @odata.key key: string,
         @odata.body
         body: {
+            key?: string;
             name?: string;
             options?: string;
         }

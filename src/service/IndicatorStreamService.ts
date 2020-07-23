@@ -4,15 +4,20 @@ import { Readable } from "stream";
 import { IndicatorService } from "./IndicatorService";
 
 interface IIndicatorInput {
+    key: string;
     name: string;
     options: number[];
 }
 
 interface IIndicator extends IIndicatorInput {
+    key: string;
+    name: string;
+    options: number[];
     outputs: number[];
 }
 
-interface IDataItem {
+export interface IDataItem {
+    time: string;
     candle: ICandle;
     indicators: IIndicator[];
 }
@@ -25,20 +30,16 @@ function calculateIndicators(
     return Promise.all(
         indicatorInputs.map(
             (indicatorInput) =>
-                new Promise<{
-                    name: string;
-                    options: number[];
-                    outputs: number[];
-                }>((resolve) => {
-                    const { name, options } = indicatorInput;
+                new Promise<IIndicator>((resolve) => {
+                    const { key, name, options } = indicatorInput;
                     const start = 1 + IndicatorService.getStart(name, options);
                     const candles1 = candles
                         .reverse()
                         .slice(0, start)
                         .reverse();
-                    // console.log(candles1.length, start);
                     if (candles1.length < start) {
                         resolve({
+                            key,
                             name,
                             options,
                             outputs: [],
@@ -49,8 +50,8 @@ function calculateIndicators(
                             name,
                             options
                         ).then((indicatorOutput) => {
-                            // console.log(candles1, indicatorOutput);
                             resolve({
+                                key,
                                 name,
                                 options,
                                 outputs: indicatorOutput[0].values,
@@ -101,6 +102,7 @@ export class IndicatorStreamService extends EventEmitter {
     public period: number;
     public indicatorInputs: IIndicatorInput[];
     public queue: Array<{
+        // TODO добавить не только свечи но и другие данные
         time: string;
         candle: ICandle;
     }> = [];
@@ -112,7 +114,6 @@ export class IndicatorStreamService extends EventEmitter {
 
     public async start(): Promise<IndicatorStreamService> {
         const options = this;
-        console.log(options);
         const stream = ExchangeService.getCandleStream(options);
         this.stream = stream;
         const { key, indicatorInputs } = options;
@@ -144,7 +145,6 @@ export class IndicatorStreamService extends EventEmitter {
                 .filter((e) => e.time <= time)
                 .sort((a, b) => (a.time > b.time ? 1 : -1));
 
-            // console.log(candles);
             // TODO
             // эта обработка может выполняться в отдельном сервисе
             // сам сервис следит за потоком своих свечей
@@ -155,8 +155,9 @@ export class IndicatorStreamService extends EventEmitter {
             // по подписке выполняется сохранение в базе данных
             calculateIndicators(candles, indicatorInputs).then((result) => {
                 instance._emitData({
+                    time,
                     candle,
-                    indicators: result
+                    indicators: result,
                 });
             });
         });

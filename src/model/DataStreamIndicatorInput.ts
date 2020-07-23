@@ -11,6 +11,9 @@ export class DataStreamIndicatorInput {
     public dataStreamId: ObjectID;
 
     @Edm.String
+    public key: string; // из фиксированного списка tulind
+
+    @Edm.String
     public name: string; // из фиксированного списка tulind
 
     @Edm.String

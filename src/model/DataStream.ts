@@ -25,6 +25,9 @@ export class DataStream {
     @Edm.Boolean
     public active: boolean;
 
+    @Edm.String
+    public strategyId: ObjectID;
+
     @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => DataStreamIndicatorInput)))
     public IndicatorInputs: DataStreamIndicatorInput[];
 

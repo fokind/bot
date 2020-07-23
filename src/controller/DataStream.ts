@@ -5,6 +5,8 @@ import connect from "../connect";
 import { DataStream } from "../model/DataStream";
 import { DataStreamIndicatorInput } from "../model/DataStreamIndicatorInput";
 import { DataStreamItem } from "../model/DataStreamItem";
+import { Strategy } from "../model/Strategy";
+import { AdviceService, IAdviceInputItem } from "../service/AdviceService";
 import { IndicatorStreamService } from "../service/IndicatorStreamService";
 
 const collectionName = "dataStream";
@@ -74,8 +76,13 @@ export class DataStreamController extends ODataController {
             currency: string;
             asset: string;
             period: number;
+            strategyId: string | ObjectID;
         }
     ): Promise<DataStream> {
+        const { strategyId } = body;
+        if (strategyId) {
+            body.strategyId = new ObjectID(strategyId);
+        }
         const result = new DataStream(body);
         const collection = await (await connect()).collection(collectionName);
         result._id = (await collection.insertOne(result)).insertedId;
@@ -91,6 +98,7 @@ export class DataStreamController extends ODataController {
             currency?: string;
             asset?: string;
             period?: number;
+            strategyId?: string | ObjectID;
             active?: boolean;
         }
     ): Promise<number> {
@@ -98,6 +106,10 @@ export class DataStreamController extends ODataController {
         const _id = new ObjectID(key);
         const { active } = body;
         delete body.active;
+        let strategyId = body.strategyId;
+        if (strategyId) {
+            body.strategyId = new ObjectID(strategyId);
+        }
         let modifiedCount = 0;
         if (Object.entries(body).length) {
             modifiedCount = (
@@ -116,6 +128,7 @@ export class DataStreamController extends ODataController {
             if (active !== options.active) {
                 if (active) {
                     const indicatorInputs: Array<{
+                        key: string;
                         name: string;
                         options: number[];
                     }> = await (await connect())
@@ -123,18 +136,62 @@ export class DataStreamController extends ODataController {
                         .find({
                             dataStreamId: _id,
                         })
-                        .map((e: { name: string; options: string }) => ({
-                            name: e.name,
-                            options: JSON.parse(e.options) as number[],
-                        }))
+                        .map(
+                            (e: {
+                                key: string;
+                                name: string;
+                                options: string;
+                            }) => ({
+                                key: e.key,
+                                name: e.name,
+                                options: JSON.parse(e.options) as number[],
+                            })
+                        )
                         .toArray();
-                    const indicatorStreamService = IndicatorStreamService.createInstance(Object.assign({
-                        key: _id.toHexString(),
-                        indicatorInputs
-                    }, options));
+                    const indicatorStreamService = IndicatorStreamService.createInstance(
+                        Object.assign(
+                            {
+                                key: _id.toHexString(),
+                                indicatorInputs,
+                            },
+                            options
+                        )
+                    );
 
-                    indicatorStreamService.onData((data) => {
-                        console.log(data);
+                    if (!strategyId) {
+                        strategyId = options.strategyId;
+                    }
+
+                    const { warmup, code: strategyCode } = (await (
+                        await connect()
+                    )
+                        .collection("strategy")
+                        .findOne({ _id: strategyId })) as Strategy;
+
+                    const data: IAdviceInputItem[] = [];
+
+                    indicatorStreamService.onData((dataItem) => {
+                        // сохранять в базу данных или выполнять постобработку
+                        // как минимум необходимо применить стратегию
+                        const existedDataItem = data.find(
+                            (e) => e.time === dataItem.time
+                        );
+                        if (existedDataItem) {
+                            Object.assign(existedDataItem, dataItem);
+                        } else {
+                            data.push(dataItem);
+                        }
+                        if (data.length > warmup) {
+                            data.shift();
+                        }
+                        if (data.length >= warmup) {
+                            const advice = AdviceService.getAdvice(
+                                data,
+                                strategyCode
+                            );
+                            const output = Object.assign({ advice }, dataItem);
+                            console.log(output); // TODO здесь должно что-то происходить
+                        }
                     });
 
                     await indicatorStreamService.start();
