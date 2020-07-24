@@ -15,6 +15,8 @@ import { IndicatorInputsController } from "./controller/IndicatorInputs";
 import { IndicatorStreamInputController } from "./controller/IndicatorStreamInputs";
 import { IndicatorStreamController } from "./controller/IndicatorStreams";
 import { OrdersController } from "./controller/Orders";
+import { PaperBalanceController } from "./controller/PaperBalance";
+import { PaperTraderController } from "./controller/PaperTrader";
 import { SessionController } from "./controller/Session";
 import { StrategiesController } from "./controller/Strategies";
 import { TickerController } from "./controller/Ticker";
@@ -38,9 +40,11 @@ import { TradesController } from "./controller/Trades";
 @odata.controller(IndicatorInputsController, true)
 @odata.controller(IndicatorStreamInputController, true)
 @odata.controller(IndicatorStreamController, true)
+@odata.controller(OrdersController, true)
+@odata.controller(PaperBalanceController, true)
+@odata.controller(PaperTraderController, true)
 @odata.controller(SessionController, true)
 @odata.controller(StrategiesController, true)
-@odata.controller(OrdersController, true)
 @odata.controller(TickerController, true)
 @odata.controller(TickerSourceController, true)
 @odata.controller(TickerStreamController, true)
