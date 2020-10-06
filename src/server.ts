@@ -3,7 +3,6 @@ import { odata, ODataServer } from "odata-v4-server";
 import { AccountController } from "./controller/Account";
 import { AdvisorsController } from "./controller/Advisors";
 import { BalanceController } from "./controller/Balance";
-import { CandleController } from "./controller/Candle";
 import { CandleImportController } from "./controller/CandleImport";
 import { CandleSourceController } from "./controller/CandleSource";
 import { CandleStreamController } from "./controller/CandleStream";
@@ -29,7 +28,6 @@ import { TradesController } from "./controller/Trades";
 @odata.controller(AccountController, true)
 @odata.controller(AdvisorsController, true)
 @odata.controller(BalanceController, true)
-@odata.controller(CandleController, true)
 @odata.controller(CandleImportController, true)
 @odata.controller(CandleSourceController, true)
 @odata.controller(CandleStreamController, true)

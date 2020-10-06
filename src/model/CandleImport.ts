@@ -1,7 +1,6 @@
 import { ObjectID } from "mongodb";
-import { Edm, odata } from "odata-v4-server";
-import connect from "../connect";
-import { CandleService } from "../service/CandleService";
+import { Edm } from "odata-v4-server";
+import { Candle } from "./Candle";
 
 export class CandleImport {
     @Edm.Key
@@ -27,45 +26,13 @@ export class CandleImport {
     @Edm.String
     public end: string;
 
+    @Edm.Int32
+    public candlesCount: number;
+
+    @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Candle)))
+    public Candles: Candle[];
+
     constructor(data: any) {
         Object.assign(this, data);
-    }
-
-    @Edm.Action
-    public async execute(
-        @odata.result
-        result: {
-            exchange: string;
-            currency: string;
-            asset: string;
-            period: number;
-            begin: string;
-            end: string;
-        }
-    ) {
-        const { exchange, currency, asset, period, begin, end } = result;
-        const collection = (await connect()).collection("candle");
-        (
-            await CandleService.getCandles({
-                exchange,
-                currency,
-                asset,
-                period,
-                begin,
-                end,
-            })
-        ).forEach(async (candle) => {
-            await (await connect()).collection("candle").findOneAndUpdate(
-                {
-                    exchange,
-                    currency,
-                    asset,
-                    period,
-                    time: candle.time,
-                },
-                { $set: candle },
-                { upsert: true }
-            );
-        });
     }
 }
