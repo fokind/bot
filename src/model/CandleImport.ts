@@ -17,7 +17,7 @@ export class CandleImport {
     @Edm.String
     public asset: string;
 
-    @Edm.Double
+    @Edm.Int32
     public period: number;
 
     @Edm.String

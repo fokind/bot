@@ -69,6 +69,7 @@ export class CandleImportController extends ODataController {
             end: string;
         }
     ): Promise<CandleImport> {
+        const { exchange, currency, asset, period } = body;
         const candles: any[] = await CandlesImport.execute(body);
         const result = new CandleImport(body);
         result.candlesCount = candles.length;
@@ -76,12 +77,15 @@ export class CandleImportController extends ODataController {
         const collection = await db.collection(collectionName);
         const importId = (await collection.insertOne(result)).insertedId;
         result._id = importId;
-
-        await db
-            .collection("candle")
-            .insertMany(
-                candles.map((e) => Object.assign(new Candle(e), { importId }))
+        const candleCollection = await db.collection("candle");
+        candles.forEach(async (candle) => {
+            const { time } = candle;
+            await candleCollection.findOneAndUpdate(
+                { exchange, currency, asset, period, time },
+                { $set: candle },
+                { upsert: true }
             );
+        });
 
         return result;
     }
@@ -101,15 +105,14 @@ export class CandleImportController extends ODataController {
         @odata.result result: any,
         @odata.query query: ODataQuery
     ): Promise<Candle[]> {
-        const importId = new ObjectID(result._id);
+        const { exchange, currency, asset, period } = result;
         const mongodbQuery = createQuery(query);
         const collection = (await connect())
             .collection("candle")
             .find({
                 $and: [
-                    {
-                        importId,
-                    },
+                    { exchange, currency, asset, period },
+                    // TODO внутри временного диапазона импорта
                     mongodbQuery.query,
                 ],
             })

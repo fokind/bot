@@ -1,43 +1,60 @@
 <mvc:View controllerName="fokind.bot.controller.CandleImports"
-    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
-    xmlns="sap.m">
-    <Page title="Candle Imports" showNavButton="true" navButtonPress=".onNavBack">
-        <content>
-            <Table id="candleImportsTable" items="{data>/CandleImports}" growingThreshold="100" inset="false">
-                <headerToolbar>
-                    <Toolbar>
-                        <content>
-                            <Title text="Candle Imports"/>
-                            <ToolbarSpacer/>
-                            <Button icon="sap-icon://add" press=".onAddPress"/>
-                        </content>
-                    </Toolbar>
-                </headerToolbar>
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.ui.table"
+    xmlns:m="sap.m">
+    <m:Page title="Candle Imports"
+        showNavButton="true"
+        navButtonPress="onBackPress"
+        showHeader="true">
+        <m:headerContent>
+            <m:Button icon="sap-icon://add" text="Add" press="onAddPress"/>
+        </m:headerContent>
+        <m:content>
+            <Table id="candleImportsTable"
+                rows="{/CandleImports}"
+                title="Candle Imports"
+                selectionMode="Single"
+                selectionBehavior="RowOnly"
+                visibleRowCountMode="Auto">
                 <columns>
                     <Column>
-                        <Text text="Symbol"/>
+                        <m:Label text="Currency" />
+                        <template>
+                            <m:Text text="{currency}" wrapping="false"/>
+                        </template>
                     </Column>
                     <Column>
-                        <Text text="Period"/>
+                        <m:Label text="Asset" />
+                        <template>
+                            <m:Text text="{asset}" wrapping="false"/>
+                        </template>
                     </Column>
                     <Column>
-                        <Text text="Begin"/>
+                        <m:Label text="Period" />
+                        <template>
+                            <m:Text text="{period}" wrapping="false"/>
+                        </template>
                     </Column>
                     <Column>
-                        <Text text="End"/>
+                        <m:Label text="Begin" />
+                        <template>
+                            <m:Text text="{begin}" wrapping="false"/>
+                        </template>
+                    </Column>
+                    <Column>
+                        <m:Label text="End" />
+                        <template>
+                            <m:Text text="{end}" wrapping="false"/>
+                        </template>
+                    </Column>
+                    <Column>
+                        <m:Label text="Candles" />
+                        <template>
+                            <m:Text text="{candlesCount}" wrapping="false"/>
+                        </template>
                     </Column>
                 </columns>
-                <items>
-                    <ColumnListItem type="Active">
-                        <cells>
-                            <Text text="{data>asset}{data>currency}"/>
-                            <Text text="{data>period}"/>
-                            <Text text="{data>begin}"/>
-                            <Text text="{data>end}"/>
-                        </cells>
-                    </ColumnListItem>
-                </items>
             </Table>
-        </content>
-    </Page>
+        </m:content>
+    </m:Page>
 </mvc:View>

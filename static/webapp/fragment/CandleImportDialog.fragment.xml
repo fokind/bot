@@ -11,8 +11,10 @@
                     <Input value="{/asset}"/>
                     <Label text="Period"/>
                     <Input value="{/period}"/>
-                    <Label text="Range"/>
-                    <Input value="{/period}"/>
+                    <Label text="Begin"/>
+                    <Input value="{/begin}"/>
+                    <Label text="End"/>
+                    <Input value="{/end}"/>
                 </form:content>
             </form:SimpleForm>
         </content>

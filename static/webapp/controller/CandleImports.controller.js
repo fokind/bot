@@ -1,42 +1,35 @@
 sap.ui.define(
     [
         "sap/ui/core/mvc/Controller",
-        "sap/ui/core/UIComponent",
         "sap/ui/core/Fragment",
         "sap/ui/model/json/JSONModel",
     ],
-    function (Controller, UIComponent, Fragment, JSONModel) {
+    function (Controller, Fragment, JSONModel) {
         "use strict";
 
         return Controller.extend("fokind.bot.controller.CandleImports", {
             onInit: function () {
-                // UIComponent.getRouterFor(this)
-                //     .getRoute("marketData")
-                //     .attachPatternMatched(this.onRouteMatched, this);
+                this.getOwnerComponent()
+                    .getRouter()
+                    .getRoute("candleImports")
+                    .attachMatched(this._onRouteMatched, this);
             },
 
-            onRouteMatched: function (oEvent) {
-                // this.getView()
-                //     .getModel("view")
-                //     .setProperty("/tab", "marketData");
-                // this.getView().getModel("view").setProperty("/Draft", {
-                //     name: "", // UNDONE
-                // });
+            _onRouteMatched: function () {
+                var oView = this.getView();
+                oView.setModel(oView.getModel("data"));
             },
 
             _getCandleImportDialogPromise: function () {
                 return new Promise(
                     function (resolve) {
                         var oView = this.getView();
-                        console.log(1);
-
                         if (!this.byId("candleImportDialog")) {
                             Fragment.load({
                                 id: oView.getId(),
                                 name: "fokind.bot.fragment.CandleImportDialog",
                                 controller: this,
                             }).then(function (oDialog) {
-                                oView.addDependent(oDialog);
                                 oDialog.setModel(new JSONModel());
                                 resolve(oDialog);
                             });
@@ -49,24 +42,32 @@ sap.ui.define(
 
             onAddPress: function () {
                 this._getCandleImportDialogPromise().then(function (oDialog) {
-                    oDialog.getModel().setData({});
+                    oDialog.getModel().setData({
+                        currency: "",
+                        asset: "",
+                        period: "",
+                        begin: "",
+                        end: "",
+                    });
                     oDialog.open();
                 });
             },
 
             onOkPress: function () {
-                // дождаться выполнения
                 this._getCandleImportDialogPromise().then(
                     function (oDialog) {
-                        var oData = oDialog.getModel().getData();
+                        var oModel = oDialog.getModel();
                         oDialog.close();
                         var oTable = this.byId("candleImportsTable");
                         oTable
-                            .getBinding("items")
+                            .getBinding("rows")
                             .create({
-                                currency: oData.currency,
-                                asset: oData.asset,
-                                period: oData.period,
+                                exchange: "hitbtc", // FIXME зменить
+                                currency: oModel.getProperty("/currency"),
+                                asset: oModel.getProperty("/asset"),
+                                period: +oModel.getProperty("/period"),
+                                begin: oModel.getProperty("/begin"),
+                                end: oModel.getProperty("/end"),
                             })
                             .created()
                             .then(function () {
@@ -81,10 +82,6 @@ sap.ui.define(
                     oDialog.close();
                 });
             },
-
-            // onNavBack: function() {
-            // 	window.history.go(-1);
-            // }
         });
     }
 );
