@@ -20,13 +20,19 @@ sap.ui.define(
                 oView.setModel(oView.getModel("data"));
             },
 
-            onRowSelectionChange: function(oEvent) {
+            onAddPress: function () {
+                this.getOwnerComponent().getRouter().navTo("backtestCreate");
+            },
+
+            onRowSelectionChange: function (oEvent) {
                 this.getOwnerComponent()
-                  .getRouter()
-                  .navTo("backtest", {
-                    id: oEvent.getParameter("rowContext").getProperty("_id")
-                  });
-              },
+                    .getRouter()
+                    .navTo("backtest", {
+                        id: oEvent
+                            .getParameter("rowContext")
+                            .getProperty("_id"),
+                    });
+            },
 
             onBackPress: function () {
                 this.getOwnerComponent().getRouter().navTo("main");

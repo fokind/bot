@@ -66,6 +66,11 @@
                     "pattern": "backtest/{id}",
                     "name": "backtest",
                     "target": "backtest"
+                },
+                {
+                    "pattern": "backtestCreate",
+                    "name": "backtestCreate",
+                    "target": "backtestCreate"
                 }
             ],
             "targets": {
@@ -83,6 +88,10 @@
                 },
                 "backtest": {
                     "viewName": "Backtest",
+                    "viewLevel": 2
+                },
+                "backtestCreate": {
+                    "viewName": "BacktestCreate",
                     "viewLevel": 2
                 }
             }
