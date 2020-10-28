@@ -1,6 +1,5 @@
 import { ObjectID } from "mongodb";
 import { Edm } from "odata-v4-server";
-import { Candle } from "./Candle";
 
 export class CandleImport {
     @Edm.Key
@@ -28,9 +27,6 @@ export class CandleImport {
 
     @Edm.Int32
     public candlesCount: number;
-
-    @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Candle)))
-    public Candles: Candle[];
 
     constructor(data: any) {
         Object.assign(this, data);

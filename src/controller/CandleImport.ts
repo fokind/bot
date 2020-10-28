@@ -3,7 +3,6 @@ import { ObjectID } from "mongodb";
 import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
 import connect from "../connect";
-import { Candle } from "../model/Candle";
 import { CandleImport } from "../model/CandleImport";
 
 const collectionName = "candleImport";
@@ -98,37 +97,5 @@ export class CandleImportController extends ODataController {
             .collection(collectionName)
             .deleteOne({ _id })
             .then((result) => result.deletedCount);
-    }
-
-    @odata.GET("Candles")
-    public async getCandles(
-        @odata.result result: any,
-        @odata.query query: ODataQuery
-    ): Promise<Candle[]> {
-        const { exchange, currency, asset, period } = result;
-        const mongodbQuery = createQuery(query);
-        const collection = (await connect())
-            .collection("candle")
-            .find({
-                $and: [
-                    { exchange, currency, asset, period },
-                    // TODO внутри временного диапазона импорта
-                    mongodbQuery.query,
-                ],
-            })
-            .project(mongodbQuery.projection);
-        const items: Candle[] & { inlinecount?: number } =
-            typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
-                ? []
-                : await collection
-                      .skip(mongodbQuery.skip || 0)
-                      .limit(mongodbQuery.limit || 0)
-                      .sort(mongodbQuery.sort)
-                      .map((e) => new Candle(e))
-                      .toArray();
-        if (mongodbQuery.inlinecount) {
-            items.inlinecount = await collection.count(false);
-        }
-        return items;
     }
 }

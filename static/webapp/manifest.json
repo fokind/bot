@@ -49,14 +49,32 @@
             "routes": [
                 {
                     "pattern": "",
+                    "name": "main",
+                    "target": "main"
+                },
+                {
+                    "pattern": "candleImports",
                     "name": "candleImports",
                     "target": "candleImports"
+                },
+                {
+                    "pattern": "backtests",
+                    "name": "backtests",
+                    "target": "backtests"
                 }
             ],
             "targets": {
+                "main": {
+                    "viewName": "Main",
+                    "viewLevel": 0
+                },
                 "candleImports": {
                     "viewName": "CandleImports",
-                    "viewLevel": 0
+                    "viewLevel": 1
+                },
+                "backtests": {
+                    "viewName": "Backtests",
+                    "viewLevel": 1
                 }
             }
         }

@@ -1,52 +1,9 @@
-import { EventEmitter } from "events";
 import { odata, ODataServer } from "odata-v4-server";
-import { AccountController } from "./controller/Account";
-import { AdvisorsController } from "./controller/Advisors";
-import { BalanceController } from "./controller/Balance";
+import { BacktestController } from "./controller/Backtest";
 import { CandleImportController } from "./controller/CandleImport";
-import { CandleSourceController } from "./controller/CandleSource";
-import { CandleStreamController } from "./controller/CandleStream";
-import { DataStreamController } from "./controller/DataStream";
-import { DataStreamIndicatorInputController } from "./controller/DataStreamIndicatorInput";
-import { DataStreamItemController } from "./controller/DataStreamItem";
-import { IndicatorController } from "./controller/Indicator";
-import { IndicatorInputsController } from "./controller/IndicatorInputs";
-import { IndicatorStreamInputController } from "./controller/IndicatorStreamInputs";
-import { IndicatorStreamController } from "./controller/IndicatorStreams";
-import { OrdersController } from "./controller/Orders";
-import { PaperBalanceController } from "./controller/PaperBalance";
-import { PaperTraderController } from "./controller/PaperTrader";
-import { SessionController } from "./controller/Session";
-import { StrategiesController } from "./controller/Strategies";
-import { TickerController } from "./controller/Ticker";
-import { TickerSourceController } from "./controller/TickerSource";
-import { TickerStreamController } from "./controller/TickerStream";
-import { TradesController } from "./controller/Trades";
 
 @odata.cors
 @odata.namespace("Bot")
-@odata.controller(AccountController, true)
-@odata.controller(AdvisorsController, true)
-@odata.controller(BalanceController, true)
+@odata.controller(BacktestController, true)
 @odata.controller(CandleImportController, true)
-@odata.controller(CandleSourceController, true)
-@odata.controller(CandleStreamController, true)
-@odata.controller(DataStreamController, true)
-@odata.controller(DataStreamIndicatorInputController, true)
-@odata.controller(DataStreamItemController, true)
-@odata.controller(IndicatorController, true)
-@odata.controller(IndicatorInputsController, true)
-@odata.controller(IndicatorStreamInputController, true)
-@odata.controller(IndicatorStreamController, true)
-@odata.controller(OrdersController, true)
-@odata.controller(PaperBalanceController, true)
-@odata.controller(PaperTraderController, true)
-@odata.controller(SessionController, true)
-@odata.controller(StrategiesController, true)
-@odata.controller(TickerController, true)
-@odata.controller(TickerSourceController, true)
-@odata.controller(TickerStreamController, true)
-@odata.controller(TradesController, true)
-export class BotServer extends ODataServer {
-    public static eventBus = new EventEmitter();
-}
+export class BotServer extends ODataServer {}

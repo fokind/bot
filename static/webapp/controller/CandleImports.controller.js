@@ -82,6 +82,10 @@ sap.ui.define(
                     oDialog.close();
                 });
             },
+
+            onBackPress: function () {
+                this.getOwnerComponent().getRouter().navTo("main");
+            },
         });
     }
 );
