@@ -13,6 +13,10 @@ sap.ui.define(
                     .getRouter()
                     .getRoute("candleImports")
                     .attachMatched(this._onRouteMatched, this);
+
+                this.getView().addStyleClass(
+                    this.getOwnerComponent().getContentDensityClass()
+                );
             },
 
             _onRouteMatched: function () {

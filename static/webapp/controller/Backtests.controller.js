@@ -9,12 +9,24 @@ sap.ui.define(
                     .getRouter()
                     .getRoute("backtests")
                     .attachMatched(this._onRouteMatched, this);
+
+                this.getView().addStyleClass(
+                    this.getOwnerComponent().getContentDensityClass()
+                );
             },
 
             _onRouteMatched: function () {
                 var oView = this.getView();
                 oView.setModel(oView.getModel("data"));
             },
+
+            onRowSelectionChange: function(oEvent) {
+                this.getOwnerComponent()
+                  .getRouter()
+                  .navTo("backtest", {
+                    id: oEvent.getParameter("rowContext").getProperty("_id")
+                  });
+              },
 
             onBackPress: function () {
                 this.getOwnerComponent().getRouter().navTo("main");
