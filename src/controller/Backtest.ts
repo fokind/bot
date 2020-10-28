@@ -71,9 +71,26 @@ export class BacktestController extends ODataController {
             strategyCode,
             strategyIndicatorInputs, // JSON, нужно парсить
             stoplossLevel,
+            exchange,
+            currency,
+            asset,
+            period,
+            begin,
+            end,
         } = body;
 
-        const candles: ICandle[] = [];
+        const db = await connect();
+        const candles: ICandle[] = await db
+            .collection("candle")
+            .find({
+                exchange,
+                currency,
+                asset,
+                period,
+                time: { $gte: begin, $lte: end },
+            })
+            .sort({ time: 1 })
+            .toArray();
 
         const strategy = new Strategy({
             warmup: 1,
@@ -103,9 +120,7 @@ export class BacktestController extends ODataController {
         );
 
         backtest._id = (
-            await (await connect())
-                .collection(collectionName)
-                .insertOne(backtest)
+            await db.collection(collectionName).insertOne(backtest)
         ).insertedId;
 
         return backtest;
