@@ -6,6 +6,9 @@
     xmlns:codeeditor="sap.ui.codeeditor"
     xmlns="sap.m" displayBlock="true">
     <Page title="Backtest" enableScrolling="false" showNavButton="true" navButtonPress="onBackPress" showHeader="true">
+        <headerContent>
+            <Button icon="sap-icon://copy" text="Clone" press="onClonePress"/>
+        </headerContent>
         <content>
             <l:ResponsiveSplitter>
                 <l:PaneContainer>

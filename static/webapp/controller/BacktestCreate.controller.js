@@ -21,16 +21,53 @@ sap.ui.define(
                 );
             },
 
-            _onRouteMatched: function () {
+            _onRouteMatched: function (oEvent) {
+                var sCloneId = oEvent.getParameter("arguments").cloneId;
                 var oView = this.getView();
-                oView.setModel(
-                    new JSONModel({
-                        exchange: "hitbtc",
-                    })
-                );
-                oView.bindElement({
-                    path: "/",
+                this._initDataPromise(sCloneId).then(function (oData) {
+                    oView.setModel(new JSONModel(oData));
+                    oView.bindElement({
+                        path: "/",
+                    });
                 });
+            },
+
+            _initDataPromise: function (sBacktestId) {
+                var oPromise;
+                if (sBacktestId) {
+                    var oDataModel = this.getView().getModel("data");
+                    var oContextBinding = oDataModel.bindContext(
+                        "/Backtests('" + sBacktestId + "')"
+                    );
+                    oPromise = oContextBinding.requestObject().then(
+                        function (oData) {
+                            console.log(oData);
+                            return {
+                                exchange: oData.exchange,
+                                currency: oData.currency,
+                                asset: oData.asset,
+                                period: "" + oData.period,
+                                begin: moment
+                                    .utc(oData.begin)
+                                    .format("YYYY-MM-DD"),
+                                end: moment.utc(oData.end).format("YYYY-MM-DD"),
+                                strategyName: oData.strategyName,
+                                strategyWarmup: "" + oData.strategyWarmup,
+                                strategyCode: oData.strategyCode,
+                                strategyIndicatorInputs:
+                                    oData.strategyIndicatorInputs,
+                                stoplossLevel: "" + oData.stoplossLevel,
+                                fee: "" + oData.fee,
+                                initialBalance: "" + oData.initialBalance,
+                            };
+                        }.bind(this)
+                    );
+                } else {
+                    oPromise = Promise.resolve({
+                        exchange: "hitbtc",
+                    });
+                }
+                return oPromise;
             },
 
             _getData: function () {

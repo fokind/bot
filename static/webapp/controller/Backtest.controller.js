@@ -20,13 +20,14 @@ sap.ui.define(["sap/ui/core/mvc/Controller"], function (Controller) {
             oView.bindElement({
                 path: "/Backtests('" + sBacktestId + "')",
             });
+        },
 
-            // использовать при редактировании
-            // var oDataModel = oView.getModel("data");
-            // var oContextBinding = oDataModel.bindContext("/Backtests('" + sBacktestId + "')");
-            // oContextBinding.requestObject().then(function (oData) {
-            // console.log(oData);
-            // });
+        onClonePress: function () {
+            this.getOwnerComponent()
+                .getRouter()
+                .navTo("backtestCreate", {
+                    cloneId: this.getView().getBindingContext().getProperty("_id"),
+                });
         },
 
         onBackPress: function () {

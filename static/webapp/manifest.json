@@ -68,7 +68,7 @@
                     "target": "backtest"
                 },
                 {
-                    "pattern": "backtestCreate",
+                    "pattern": "backtestCreate/:cloneId:",
                     "name": "backtestCreate",
                     "target": "backtestCreate"
                 }
