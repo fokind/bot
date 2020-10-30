@@ -1,6 +1,6 @@
 import { ObjectID } from "mongodb";
 import { Edm } from "odata-v4-server";
-import { Trade } from "./Trade";
+import { Roundtrip } from "./Roundtrip";
 
 export class Backtest {
     @Edm.Key
@@ -46,9 +46,6 @@ export class Backtest {
     @Edm.String
     public strategyIndicatorInputs: string; // Array<{ key: string; name: string; options: number[]; }>;
 
-    // @Edm.Boolean
-    // public stoplossEnabled: boolean;
-
     @Edm.Double
     public stoplossLevel: number; // доля от цены
 
@@ -61,11 +58,8 @@ export class Backtest {
     @Edm.Double
     public finalBalance: number;
 
-    // @Edm.Double
-    // public profit: number;
-
-    @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Trade)))
-    public Trades: Trade[];
+    @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Roundtrip)))
+    public Roundtrips: Roundtrip[];
 
     constructor(data: any) {
         Object.assign(this, data);

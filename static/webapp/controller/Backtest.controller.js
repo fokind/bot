@@ -26,7 +26,9 @@ sap.ui.define(["sap/ui/core/mvc/Controller"], function (Controller) {
             this.getOwnerComponent()
                 .getRouter()
                 .navTo("backtestCreate", {
-                    cloneId: this.getView().getBindingContext().getProperty("_id"),
+                    cloneId: this.getView()
+                        .getBindingContext()
+                        .getProperty("_id"),
                 });
         },
 

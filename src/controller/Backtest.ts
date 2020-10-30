@@ -8,7 +8,7 @@ import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
 import connect from "../connect";
 import { Backtest } from "../model/Backtest";
-import { Trade } from "../model/Trade";
+import { Roundtrip } from "../model/Roundtrip";
 
 const collectionName = "backtest";
 
@@ -71,6 +71,8 @@ export class BacktestController extends ODataController {
         const {
             initialBalance,
             fee,
+            strategyName,
+            strategyWarmup,
             strategyCode,
             strategyIndicatorInputs, // JSON, нужно парсить
             stoplossLevel,
@@ -113,14 +115,26 @@ export class BacktestController extends ODataController {
 
         await backtestService.execute();
 
-        const backtest = new Backtest(
-            Object.assign(
-                {
-                    finalBalance: backtestService.finalBalance,
-                },
-                body
-            )
-        );
+        const { trades } = backtestService;
+
+        const backtest = new Backtest({
+            exchange,
+            currency,
+            asset,
+            period,
+            begin,
+            end,
+            strategyName,
+            strategyWarmup,
+            strategyCode,
+            strategyIndicatorInputs, // JSON, нужно парсить
+            stoplossLevel,
+            fee,
+            initialBalance,
+            finalBalance: trades.length
+                ? trades[trades.length - 1].amount
+                : initialBalance,
+        });
 
         const backtestId = (
             await db.collection(collectionName).insertOne(backtest)
@@ -128,21 +142,32 @@ export class BacktestController extends ODataController {
 
         backtest._id = backtestId;
 
-        await db.collection("trade").insertMany(
-            backtestService.trades.map(
-                ({ time, side, quantity, price, amount, fee: tradeFee }) => {
-                    return new Trade({
-                        time,
-                        side,
-                        quantity,
-                        price,
-                        amount,
-                        fee: tradeFee,
-                        backtestId,
-                    });
-                }
-            )
-        );
+        let roundtrip: Roundtrip = null;
+        const roundtrips: Roundtrip[] = [];
+
+        trades.forEach((trade) => {
+            // если открытого нет, тогда сначала создать
+            // предполагается что трейды чередуются, открывающий и закрывающий
+            if (!roundtrip) {
+                roundtrip = new Roundtrip({
+                    begin: trade.time,
+                    openPrice: trade.price,
+                    openAmount: trade.amount + trade.fee,
+                    fee: trade.fee,
+                    backtestId,
+                });
+            } else {
+                roundtrip.end = trade.time;
+                roundtrip.closePrice = trade.price;
+                roundtrip.closeAmount = trade.amount - trade.fee;
+                roundtrip.fee = roundtrip.fee + trade.fee;
+                roundtrip.profit = roundtrip.closeAmount - roundtrip.openAmount;
+                roundtrips.push(roundtrip);
+                roundtrip = null;
+            }
+        });
+
+        await db.collection("roundtrip").insertMany(roundtrips);
 
         return backtest;
     }
@@ -173,16 +198,16 @@ export class BacktestController extends ODataController {
             .then((result) => result.deletedCount);
     }
 
-    @odata.GET("Trades")
-    public async getTrades(
+    @odata.GET("Roundtrips")
+    public async getRoundtrips(
         @odata.result result: any,
         @odata.query query: ODataQuery
-    ): Promise<Trade[] & { inlinecount?: number }> {
+    ): Promise<Roundtrip[] & { inlinecount?: number }> {
         const backtestId = new ObjectID(result._id);
         const db = await connect();
-        const collection = db.collection("trade");
+        const collection = db.collection("roundtrip");
         const mongodbQuery = createQuery(query);
-        const items: Trade[] & { inlinecount?: number } =
+        const items: Roundtrip[] & { inlinecount?: number } =
             typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
                 ? []
                 : await collection
