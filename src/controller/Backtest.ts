@@ -131,9 +131,6 @@ export class BacktestController extends ODataController {
             stoplossLevel,
             fee,
             initialBalance,
-            finalBalance: trades.length
-                ? trades[trades.length - 1].amount
-                : initialBalance,
         });
 
         const backtestId = (
@@ -144,6 +141,11 @@ export class BacktestController extends ODataController {
 
         let roundtrip: Roundtrip = null;
         const roundtrips: Roundtrip[] = [];
+
+        let peak = initialBalance;
+        let maxDrawDown = 0;
+        let losingLength = 0;
+        let maxLosingSeriesLength = 0;
 
         trades.forEach((trade) => {
             // если открытого нет, тогда сначала создать
@@ -162,12 +164,52 @@ export class BacktestController extends ODataController {
                 roundtrip.closeAmount = trade.amount - trade.fee;
                 roundtrip.fee = roundtrip.fee + trade.fee;
                 roundtrip.profit = roundtrip.closeAmount - roundtrip.openAmount;
+
+                peak = Math.max(peak, roundtrip.closeAmount);
+
+                if (roundtrip.profit > 0) {
+                    losingLength = 0;
+                } else {
+                    maxLosingSeriesLength = Math.max(
+                        maxLosingSeriesLength,
+                        ++losingLength
+                    );
+                    maxDrawDown = Math.max(
+                        maxDrawDown,
+                        1 - roundtrip.closeAmount / peak
+                    );
+                }
+
                 roundtrips.push(roundtrip);
                 roundtrip = null;
             }
         });
 
         await db.collection("roundtrip").insertMany(roundtrips);
+
+        const tradesCount = roundtrips.length;
+        const winningTradesCount = roundtrips.filter((e) => e.profit > 0)
+            .length;
+        const losingTradesCount = tradesCount - winningTradesCount;
+        const delta = {
+            finalBalance: tradesCount ? roundtrips[tradesCount - 1].closeAmount : initialBalance,
+            maxDrawDown,
+            maxLosingSeriesLength,
+            tradesCount,
+            winningTradesCount,
+            losingTradesCount,
+            winningTradesPercentage: winningTradesCount / tradesCount,
+            losingTradesPercentage: losingTradesCount / tradesCount,
+        };
+
+        await db.collection(collectionName).updateOne(
+            { _id: backtestId },
+            {
+                $set: delta,
+            }
+        );
+
+        Object.assign(backtest, delta);
 
         return backtest;
     }

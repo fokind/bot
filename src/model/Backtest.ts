@@ -58,6 +58,27 @@ export class Backtest {
     @Edm.Double
     public finalBalance: number;
 
+    @Edm.Double
+    public maxDrawDown: number;
+
+    @Edm.Double
+    public tradesCount: number;
+
+    @Edm.Double
+    public winningTradesCount: number;
+
+    @Edm.Double
+    public losingTradesCount: number;
+
+    @Edm.Double
+    public winningTradesPercentage: number;
+
+    @Edm.Double
+    public losingTradesPercentage: number;
+
+    @Edm.Int32
+    public maxLosingSeriesLength: number;
+
     @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Roundtrip)))
     public Roundtrips: Roundtrip[];
 
