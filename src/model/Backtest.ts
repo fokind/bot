@@ -1,5 +1,6 @@
 import { ObjectID } from "mongodb";
 import { Edm } from "odata-v4-server";
+import { Trade } from "./Trade";
 
 export class Backtest {
     @Edm.Key
@@ -62,6 +63,9 @@ export class Backtest {
 
     // @Edm.Double
     // public profit: number;
+
+    @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Trade)))
+    public Trades: Trade[];
 
     constructor(data: any) {
         Object.assign(this, data);

@@ -11,7 +11,9 @@ const collectionName = "candleImport";
 @Edm.EntitySet("CandleImports")
 export class CandleImportController extends ODataController {
     @odata.GET
-    public async get(@odata.query query: ODataQuery): Promise<CandleImport[]> {
+    public async get(
+        @odata.query query: ODataQuery
+    ): Promise<CandleImport[] & { inlinecount?: number }> {
         const db = await connect();
         const mongodbQuery = createQuery(query);
 
