@@ -70,7 +70,7 @@ export class CandleImportController extends ODataController {
             end: string;
         }
     ): Promise<CandleImport> {
-        const { exchange, currency, asset, period } = body;
+        const { exchange, currency, asset, period, begin, end } = body;
         const candles: any[] = await CandlesImport.execute(body);
         const result = new CandleImport(body);
         result.candlesCount = candles.length;
@@ -79,14 +79,21 @@ export class CandleImportController extends ODataController {
         const importId = (await collection.insertOne(result)).insertedId;
         result._id = importId;
         const candleCollection = await db.collection("candle");
-        candles.forEach(async (candle) => {
-            const { time } = candle;
-            await candleCollection.findOneAndUpdate(
-                { exchange, currency, asset, period, time },
-                { $set: candle },
-                { upsert: true }
-            );
+
+        // сначала удалить существующие
+        await candleCollection.deleteMany({
+            exchange,
+            currency,
+            asset,
+            period,
+            time: { $gte: begin, $lte: end },
         });
+
+        await candleCollection.insertMany(
+            candles.map((candle) =>
+                Object.assign({ exchange, currency, asset, period }, candle)
+            )
+        );
 
         return result;
     }

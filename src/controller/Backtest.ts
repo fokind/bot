@@ -192,7 +192,9 @@ export class BacktestController extends ODataController {
             .length;
         const losingTradesCount = tradesCount - winningTradesCount;
         const delta = {
-            finalBalance: tradesCount ? roundtrips[tradesCount - 1].closeAmount : initialBalance,
+            finalBalance: tradesCount
+                ? roundtrips[tradesCount - 1].closeAmount
+                : initialBalance,
             maxDrawDown,
             maxLosingSeriesLength,
             tradesCount,
