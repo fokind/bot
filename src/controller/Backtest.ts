@@ -8,6 +8,8 @@ import { createQuery } from "odata-v4-mongodb";
 import { Edm, odata, ODataController, ODataQuery } from "odata-v4-server";
 import connect from "../connect";
 import { Backtest } from "../model/Backtest";
+import { Balance } from "../model/Balance";
+import { Candle } from "../model/Candle";
 import { Roundtrip } from "../model/Roundtrip";
 
 const collectionName = "backtest";
@@ -187,6 +189,25 @@ export class BacktestController extends ODataController {
 
         await db.collection("roundtrip").insertMany(roundtrips);
 
+        const balanceItems: Balance[] = roundtrips.map(
+            (e) =>
+                new Balance({
+                    time: e.end,
+                    available: e.closeAmount,
+                    backtestId,
+                })
+        );
+
+        balanceItems.unshift(
+            new Balance({
+                time: begin,
+                available: initialBalance,
+                backtestId,
+            })
+        );
+
+        await db.collection("balance").insertMany(balanceItems);
+
         const tradesCount = roundtrips.length;
         const winningTradesCount = roundtrips.filter((e) => e.profit > 0)
             .length;
@@ -242,6 +263,47 @@ export class BacktestController extends ODataController {
             .then((result) => result.deletedCount);
     }
 
+    @odata.GET("Candles")
+    public async getCandles(
+        @odata.result result: any,
+        @odata.query query: ODataQuery
+    ): Promise<Candle[] & { inlinecount?: number }> {
+        const { exchange, currency, asset, period, begin, end } = result;
+
+        const db = await connect();
+        const collection = db.collection("candle");
+        const mongodbQuery = createQuery(query);
+        const findQuery = {
+            $and: [
+                {
+                    exchange,
+                    currency,
+                    asset,
+                    period,
+                    time: { $gte: begin, $lte: end },
+                },
+                mongodbQuery.query,
+            ],
+        };
+        const items: Candle[] & { inlinecount?: number } =
+            typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
+                ? []
+                : await collection
+                      .find(findQuery)
+                      .project(mongodbQuery.projection)
+                      .skip(mongodbQuery.skip || 0)
+                      .limit(mongodbQuery.limit || 0)
+                      .sort(Object.assign({ time: 1 }, mongodbQuery.sort))
+                      .toArray();
+        if (mongodbQuery.inlinecount) {
+            items.inlinecount = await collection
+                .find(findQuery)
+                .project(mongodbQuery.projection)
+                .count(false);
+        }
+        return items;
+    }
+
     @odata.GET("Roundtrips")
     public async getRoundtrips(
         @odata.result result: any,
@@ -266,7 +328,49 @@ export class BacktestController extends ODataController {
                       .project(mongodbQuery.projection)
                       .skip(mongodbQuery.skip || 0)
                       .limit(mongodbQuery.limit || 0)
-                      .sort(mongodbQuery.sort)
+                      .sort(Object.assign({ begin: 1 }, mongodbQuery.sort))
+                      .toArray();
+        if (mongodbQuery.inlinecount) {
+            items.inlinecount = await collection
+                .find({
+                    $and: [
+                        {
+                            backtestId,
+                        },
+                        mongodbQuery.query,
+                    ],
+                })
+                .project(mongodbQuery.projection)
+                .count(false);
+        }
+        return items;
+    }
+
+    @odata.GET("BalanceHistory")
+    public async getBalanceHistory(
+        @odata.result result: any,
+        @odata.query query: ODataQuery
+    ): Promise<Balance[] & { inlinecount?: number }> {
+        const backtestId = new ObjectID(result._id);
+        const db = await connect();
+        const collection = db.collection("balance");
+        const mongodbQuery = createQuery(query);
+        const items: Balance[] & { inlinecount?: number } =
+            typeof mongodbQuery.limit === "number" && mongodbQuery.limit === 0
+                ? []
+                : await collection
+                      .find({
+                          $and: [
+                              {
+                                  backtestId,
+                              },
+                              mongodbQuery.query,
+                          ],
+                      })
+                      .project(mongodbQuery.projection)
+                      .skip(mongodbQuery.skip || 0)
+                      .limit(mongodbQuery.limit || 0)
+                      .sort(Object.assign({ time: 1 }, mongodbQuery.sort))
                       .toArray();
         if (mongodbQuery.inlinecount) {
             items.inlinecount = await collection

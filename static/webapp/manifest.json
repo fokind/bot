@@ -19,14 +19,15 @@
         "dependencies": {
             "libs": {
                 "sap.m": {},
-                "sap.ui.core": {}
+                "sap.ui.core": {},
+                "openui5.financial.chart": {}
             }
         },
         "models": {
             "data": {
                 "dataSource": "default",
                 "settings": {
-                    "autoExpandSelect": true,
+                    "autoExpandSelect": false,
                     "groupId": "$direct",
                     "synchronizationMode": "None",
                     "operationMode": "Server"

@@ -41,7 +41,6 @@ sap.ui.define(
                     );
                     oPromise = oContextBinding.requestObject().then(
                         function (oData) {
-                            console.log(oData);
                             return {
                                 exchange: oData.exchange,
                                 currency: oData.currency,

@@ -1,39 +1,65 @@
-sap.ui.define(["sap/ui/core/mvc/Controller"], function (Controller) {
-    "use strict";
+sap.ui.define(
+    ["sap/ui/core/mvc/Controller", "sap/ui/model/json/JSONModel"],
+    function (Controller, JSONModel) {
+        "use strict";
 
-    return Controller.extend("fokind.bot.controller.Backtest", {
-        onInit: function () {
-            this.getOwnerComponent()
-                .getRouter()
-                .getRoute("backtest")
-                .attachMatched(this._onRouteMatched, this);
+        return Controller.extend("fokind.bot.controller.Backtest", {
+            onInit: function () {
+                this.getOwnerComponent()
+                    .getRouter()
+                    .getRoute("backtest")
+                    .attachMatched(this._onRouteMatched, this);
 
-            this.getView().addStyleClass(
-                this.getOwnerComponent().getContentDensityClass()
-            );
-        },
+                this.getView().addStyleClass(
+                    this.getOwnerComponent().getContentDensityClass()
+                );
+            },
 
-        _onRouteMatched: function (oEvent) {
-            var oView = this.getView();
-            var sBacktestId = oEvent.getParameter("arguments").id;
-            oView.setModel(oView.getModel("data"));
-            oView.bindElement({
-                path: "/Backtests('" + sBacktestId + "')",
-            });
-        },
+            _onRouteMatched: function (oEvent) {
+                var oView = this.getView();
+                var sBacktestId = oEvent.getParameter("arguments").id;
+                this._getDataPromise(sBacktestId).then(
+                    function (oData) {
+                        oView.setModel(new JSONModel(oData));
+                        oView.bindElement({
+                            path: "/",
+                            events: {
+                                change: function () {
+                                    this.byId("candlestickChart").refresh();
+                                    this.byId("balanceHistoryChart").refresh();
+                                }.bind(this),
+                            },
+                        });
+                    }.bind(this)
+                );
+            },
 
-        onClonePress: function () {
-            this.getOwnerComponent()
-                .getRouter()
-                .navTo("backtestCreate", {
-                    cloneId: this.getView()
-                        .getBindingContext()
-                        .getProperty("_id"),
-                });
-        },
+            _getDataPromise: function (sBacktestId) {
+                var oModel = this.getView().getModel("data");
+                var oContext = oModel.createBindingContext(
+                    "/Backtests('" + sBacktestId + "')"
+                );
 
-        onBackPress: function () {
-            this.getOwnerComponent().getRouter().navTo("backtests");
-        },
-    });
-});
+                return oModel
+                    .bindContext("", oContext, {
+                        $expand: "Candles,BalanceHistory",
+                    })
+                    .requestObject();
+            },
+
+            onClonePress: function () {
+                this.getOwnerComponent()
+                    .getRouter()
+                    .navTo("backtestCreate", {
+                        cloneId: this.getView()
+                            .getBindingContext()
+                            .getProperty("_id"),
+                    });
+            },
+
+            onBackPress: function () {
+                this.getOwnerComponent().getRouter().navTo("backtests");
+            },
+        });
+    }
+);

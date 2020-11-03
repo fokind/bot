@@ -5,6 +5,7 @@
     xmlns:form="sap.ui.layout.form"
     xmlns:codeeditor="sap.ui.codeeditor"
     xmlns:t="sap.ui.table"
+    xmlns:chart="openui5.financial.chart"
     xmlns="sap.m" displayBlock="true">
     <Page title="Backtest" enableScrolling="false" showNavButton="true" navButtonPress="onBackPress" showHeader="true">
         <headerContent>
@@ -124,6 +125,20 @@
                     </l:PaneContainer>
                     <l:PaneContainer>
                         <l:SplitPane>
+                            <VBox>
+                                <chart:Chart id="candlestickChart" height="240px" padding="5 20 25 60" start="{begin}" end="{end}" period="{period}">
+                                    <chart:CandlestickChart items="{Candles}">
+                                        <chart:Candle time="{time}" open="{open}" high="{high}" low="{low}" close="{close}"/>
+                                    </chart:CandlestickChart>
+                                </chart:Chart>
+                                <chart:Chart id="balanceHistoryChart" height="120px" padding="5 20 25 60" start="{begin}" end="{end}" period="{period}">
+                                    <chart:SteppedLineChart items="{BalanceHistory}">
+                                        <chart:LineChartItem time="{time}" value="{available}"/>
+                                    </chart:SteppedLineChart>
+                                </chart:Chart>
+                            </VBox>
+                        </l:SplitPane>
+                        <!-- <l:SplitPane>
                             <t:Table id="roundtrips" rows="{Roundtrips}" title="Roundtrips" selectionMode="Single" selectionBehavior="RowOnly" visibleRowCountMode="Auto">
                                 <t:columns>
                                     <t:Column>
@@ -176,7 +191,7 @@
                                     </t:Column>
                                 </t:columns>
                             </t:Table>
-                        </l:SplitPane>
+                        </l:SplitPane> -->
                     </l:PaneContainer>
                 </l:PaneContainer>
             </l:ResponsiveSplitter>

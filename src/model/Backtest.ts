@@ -1,5 +1,7 @@
 import { ObjectID } from "mongodb";
 import { Edm } from "odata-v4-server";
+import { Balance } from "./Balance";
+import { Candle } from "./Candle";
 import { Roundtrip } from "./Roundtrip";
 
 export class Backtest {
@@ -79,8 +81,14 @@ export class Backtest {
     @Edm.Int32
     public maxLosingSeriesLength: number;
 
+    @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Candle)))
+    public Candles: Candle[];
+
     @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Roundtrip)))
     public Roundtrips: Roundtrip[];
+
+    @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Balance)))
+    public BalanceHistory: Balance[];
 
     constructor(data: any) {
         Object.assign(this, data);
