@@ -14,6 +14,11 @@
 						</l:BlockLayoutCell>
 						<l:BlockLayoutCell titleAlignment="Center">
 							<l:titleLink>
+								<Link text="Ideal Backtests" href="/#/idealBacktests"/>
+							</l:titleLink>
+						</l:BlockLayoutCell>
+						<l:BlockLayoutCell titleAlignment="Center">
+							<l:titleLink>
 								<Link text="Backtests" href="/#/backtests"/>
 							</l:titleLink>
 						</l:BlockLayoutCell>

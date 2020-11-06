@@ -9,11 +9,11 @@ sap.ui.define(
     function (Controller, JSONModel) {
         "use strict";
 
-        return Controller.extend("fokind.bot.controller.BacktestCreate", {
+        return Controller.extend("fokind.bot.controller.IdealBacktestCreate", {
             onInit: function () {
                 this.getOwnerComponent()
                     .getRouter()
-                    .getRoute("backtestCreate")
+                    .getRoute("idealBacktestCreate")
                     .attachMatched(this._onRouteMatched, this);
 
                 this.getView().addStyleClass(
@@ -37,7 +37,7 @@ sap.ui.define(
                 if (sBacktestId) {
                     var oDataModel = this.getView().getModel("data");
                     var oContextBinding = oDataModel.bindContext(
-                        "/Backtests('" + sBacktestId + "')"
+                        "/IdealBacktests('" + sBacktestId + "')"
                     );
                     oPromise = oContextBinding.requestObject().then(
                         function (oData) {
@@ -50,12 +50,6 @@ sap.ui.define(
                                     .utc(oData.begin)
                                     .format("YYYY-MM-DD"),
                                 end: moment.utc(oData.end).format("YYYY-MM-DD"),
-                                strategyName: oData.strategyName,
-                                strategyWarmup: "" + oData.strategyWarmup,
-                                strategyCode: oData.strategyCode,
-                                strategyIndicatorInputs:
-                                    oData.strategyIndicatorInputs,
-                                stoplossLevel: "" + oData.stoplossLevel,
                                 fee: "" + oData.fee,
                                 initialBalance: "" + oData.initialBalance,
                             };
@@ -84,17 +78,6 @@ sap.ui.define(
                         .utc(oBindingContext.getProperty("end"))
                         .endOf("day")
                         .toISOString(),
-                    strategyName: oBindingContext.getProperty("strategyName"),
-                    strategyWarmup: +oBindingContext.getProperty(
-                        "strategyWarmup"
-                    ),
-                    strategyCode: oBindingContext.getProperty("strategyCode"),
-                    strategyIndicatorInputs: oBindingContext.getProperty(
-                        "strategyIndicatorInputs"
-                    ),
-                    stoplossLevel: +oBindingContext.getProperty(
-                        "stoplossLevel"
-                    ),
                     fee: +oBindingContext.getProperty("fee"),
                     initialBalance: +oBindingContext.getProperty(
                         "initialBalance"
@@ -104,13 +87,13 @@ sap.ui.define(
 
             onRunPress: function () {
                 var oDataModel = this.getView().getModel("data");
-                var oListBinding = oDataModel.bindList("/Backtests");
+                var oListBinding = oDataModel.bindList("/IdealBacktests");
                 var oContext = oListBinding.create(this._getData());
                 oContext.created().then(
                     function () {
                         this.getOwnerComponent()
                             .getRouter()
-                            .navTo("backtest", {
+                            .navTo("idealBacktest", {
                                 id: oContext.getProperty("_id"),
                             });
                     }.bind(this)
@@ -118,7 +101,7 @@ sap.ui.define(
             },
 
             onBackPress: function () {
-                this.getOwnerComponent().getRouter().navTo("backtests");
+                this.getOwnerComponent().getRouter().navTo("idealBacktests");
             },
         });
     }

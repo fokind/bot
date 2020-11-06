@@ -34,7 +34,16 @@ sap.ui.define(
                                 name: "fokind.bot.fragment.CandleImportDialog",
                                 controller: this,
                             }).then(function (oDialog) {
-                                oDialog.setModel(new JSONModel());
+                                oDialog.setModel(
+                                    new JSONModel({
+                                        exchange: "hitbtc", // FIXME зменить
+                                        currency: "",
+                                        asset: "",
+                                        period: "",
+                                        begin: "",
+                                        end: "",
+                                    })
+                                );
                                 resolve(oDialog);
                             });
                         } else {
@@ -46,13 +55,6 @@ sap.ui.define(
 
             onAddPress: function () {
                 this._getCandleImportDialogPromise().then(function (oDialog) {
-                    oDialog.getModel().setData({
-                        currency: "",
-                        asset: "",
-                        period: "",
-                        begin: "",
-                        end: "",
-                    });
                     oDialog.open();
                 });
             },
@@ -66,7 +68,7 @@ sap.ui.define(
                         oTable
                             .getBinding("rows")
                             .create({
-                                exchange: "hitbtc", // FIXME зменить
+                                exchange: oModel.getProperty("/exchange"),
                                 currency: oModel.getProperty("/currency"),
                                 asset: oModel.getProperty("/asset"),
                                 period: +oModel.getProperty("/period"),

@@ -90,7 +90,30 @@ export class Backtest {
     @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Balance)))
     public BalanceHistory: Balance[];
 
-    constructor(data: any) {
+    constructor(data?: {
+        _id?: ObjectID;
+        exchange?: string;
+        currency?: string;
+        asset?: string;
+        period?: number;
+        begin?: string;
+        end?: string;
+        strategyName?: string;
+        strategyWarmup?: number;
+        strategyCode?: string;
+        strategyIndicatorInputs?: string;
+        stoplossLevel?: number;
+        fee?: number;
+        initialBalance?: number;
+        finalBalance?: number;
+        maxDrawDown?: number;
+        tradesCount?: number;
+        winningTradesCount?: number;
+        losingTradesCount?: number;
+        winningTradesPercentage?: number;
+        losingTradesPercentage?: number;
+        maxLosingSeriesLength?: number;
+    }) {
         Object.assign(this, data);
     }
 }

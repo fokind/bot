@@ -59,6 +59,21 @@
                     "target": "candleImports"
                 },
                 {
+                    "pattern": "idealBacktests",
+                    "name": "idealBacktests",
+                    "target": "idealBacktests"
+                },
+                {
+                    "pattern": "idealBacktest/{id}",
+                    "name": "idealBacktest",
+                    "target": "idealBacktest"
+                },
+                {
+                    "pattern": "idealBacktestCreate/:cloneId:",
+                    "name": "idealBacktestCreate",
+                    "target": "idealBacktestCreate"
+                },
+                {
                     "pattern": "backtests",
                     "name": "backtests",
                     "target": "backtests"
@@ -83,6 +98,18 @@
                     "viewName": "CandleImports",
                     "viewLevel": 1
                 },
+                "idealBacktests": {
+                    "viewName": "IdealBacktests",
+                    "viewLevel": 1
+                },
+                "idealBacktest": {
+                    "viewName": "IdealBacktest",
+                    "viewLevel": 2
+                },
+                "idealBacktestCreate": {
+                    "viewName": "IdealBacktestCreate",
+                    "viewLevel": 3
+                },
                 "backtests": {
                     "viewName": "Backtests",
                     "viewLevel": 1
@@ -93,7 +120,7 @@
                 },
                 "backtestCreate": {
                     "viewName": "BacktestCreate",
-                    "viewLevel": 2
+                    "viewLevel": 3
                 }
             }
         }

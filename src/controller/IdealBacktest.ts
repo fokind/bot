@@ -1,6 +1,6 @@
 import {
-    Backtest as BacktestService,
     ICandle,
+    IdealBacktest as BacktestService,
     Strategy,
 } from "crypto-backtest";
 import { ObjectID } from "mongodb";
@@ -12,11 +12,11 @@ import { Balance } from "../model/Balance";
 import { Candle } from "../model/Candle";
 import { Roundtrip } from "../model/Roundtrip";
 
-const collectionName = "backtest";
+const collectionName = "idealBacktest";
 
 @odata.type(Backtest)
-@Edm.EntitySet("Backtests")
-export class BacktestController extends ODataController {
+@Edm.EntitySet("IdealBacktests")
+export class IdealBacktestController extends ODataController {
     @odata.GET
     public async get(
         @odata.query query: ODataQuery
@@ -99,23 +99,13 @@ export class BacktestController extends ODataController {
             .sort({ time: 1 })
             .toArray();
 
-        const strategy = new Strategy({
-            warmup: 1,
-            execute: new Function("data", strategyCode) as (
-                data: any
-            ) => string,
-            indicatorInputs: JSON.parse(strategyIndicatorInputs),
-        });
-
         const backtestService = new BacktestService({
             candles,
-            strategy,
             initialBalance,
-            stoplossLevel,
             fee,
         });
 
-        await backtestService.execute();
+        backtestService.execute();
 
         const {
             roundtrips,
