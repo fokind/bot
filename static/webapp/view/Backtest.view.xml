@@ -6,6 +6,7 @@
     xmlns:codeeditor="sap.ui.codeeditor"
     xmlns:t="sap.ui.table"
     xmlns:chart="openui5.financial.chart"
+    xmlns:indicator="openui5.financial.chart.indicator"
     xmlns="sap.m" displayBlock="true">
     <Page title="Backtest" enableScrolling="false" showNavButton="true" navButtonPress="onBackPress" showHeader="true">
         <headerContent>
@@ -137,6 +138,13 @@
                                     </chart:SteppedLineChart>
                                 </chart:Chart>
                             </VBox>
+                            <!-- <VBox id="indicatorCharts" items="{Indicators}">
+                                <chart:Chart height="90px" padding="5 20 25 60" start="{begin}" end="{end}" period="{period}">
+                                    <indicator:CCIOZ items="{Output}" overboughtZone="100" oversoldZone="-100">
+                                        <chart:LineChartItem time="{time}" value="{Values/0}"/>
+                                    </indicator:CCIOZ>
+                                </chart:Chart>
+                            </VBox> -->
                         </l:SplitPane>
                         <!-- <l:SplitPane>
                             <t:Table id="roundtrips" rows="{Roundtrips}" title="Roundtrips" selectionMode="Single" selectionBehavior="RowOnly" visibleRowCountMode="Auto">
