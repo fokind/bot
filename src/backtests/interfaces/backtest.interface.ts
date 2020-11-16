@@ -1,7 +1,7 @@
 import { ObjectID } from "mongodb";
 
 export interface IBacktest {
-    _id: ObjectID;
+    _id?: ObjectID;
     exchange: string;
     currency: string;
     asset: string;
@@ -15,12 +15,12 @@ export interface IBacktest {
     stoplossLevel: number;
     fee: number;
     initialBalance: number;
-    finalBalance: number;
-    maxDrawDown: number;
-    tradesCount: number;
-    winningTradesCount: number;
-    losingTradesCount: number;
-    winningTradesPercentage: number;
-    losingTradesPercentage: number;
-    maxLosingSeriesLength: number;
+    finalBalance?: number;
+    maxDrawDown?: number;
+    tradesCount?: number;
+    winningTradesCount?: number;
+    losingTradesCount?: number;
+    winningTradesPercentage?: number;
+    losingTradesPercentage?: number;
+    maxLosingSeriesLength?: number;
 }

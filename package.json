@@ -47,7 +47,8 @@
         "openui5-financial-charts": "file:../openui5-financial-charts",
         "reflect-metadata": "^0.1.13",
         "rimraf": "^3.0.2",
-        "rxjs": "^6.6.3"
+        "rxjs": "^6.6.3",
+        "tulind": "^0.8.18"
     },
     "devDependencies": {
         "@nestjs/cli": "^7.5.1",

@@ -1,6 +1,6 @@
 import { IsNotEmpty } from "class-validator";
 
-export class BacktestDto {
+export class CreateBacktestDto {
     @IsNotEmpty()
     readonly exchange: string;
 
