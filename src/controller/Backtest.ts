@@ -10,6 +10,7 @@ import connect from "../connect";
 import { Backtest } from "../model/Backtest";
 import { Balance } from "../model/Balance";
 import { Candle } from "../model/Candle";
+import { Indicator } from "../model/Indicator";
 import { Roundtrip } from "../model/Roundtrip";
 
 const collectionName = "backtest";
@@ -348,5 +349,17 @@ export class BacktestController extends ODataController {
                 .count(false);
         }
         return items;
+    }
+
+    @odata.GET("Indicators")
+    public async getIndicators(
+        @odata.result result: any,
+        @odata.query query: ODataQuery
+    ): Promise<Indicator[] & { inlinecount?: number }> {
+        // запросить свечи
+        // преобразовать в индикаторы
+        // а еще лучше взять из базы данных уже посчитанные для бэктеста
+        // хотя может и не лучше, быстро закончится место на диске
+        return [];
     }
 }

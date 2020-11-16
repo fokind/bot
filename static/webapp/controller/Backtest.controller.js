@@ -27,6 +27,9 @@ sap.ui.define(
                                 change: function () {
                                     this.byId("candlestickChart").refresh();
                                     this.byId("balanceHistoryChart").refresh();
+                                    var aIndicatorCharts = this.byId("indicatorCharts").getItems();
+                                    console.log(aIndicatorCharts);
+                                    console.log(oView.getModel().getData());
                                 }.bind(this),
                             },
                         });
@@ -42,7 +45,7 @@ sap.ui.define(
 
                 return oModel
                     .bindContext("", oContext, {
-                        $expand: "Candles,BalanceHistory",
+                        $expand: "Candles,BalanceHistory,Indicators",
                     })
                     .requestObject();
             },

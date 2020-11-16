@@ -42,7 +42,8 @@
         "odata-v4-mongodb": "^0.1.12",
         "odata-v4-server": "^0.2.13",
         "openui5-financial-charts": "file:../openui5-financial-charts",
-        "patch-package": "^6.2.0"
+        "patch-package": "^6.2.0",
+        "tulind": "^0.8.18"
     },
     "devDependencies": {
         "@types/express": "^4.17.2",

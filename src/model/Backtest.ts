@@ -2,6 +2,7 @@ import { ObjectID } from "mongodb";
 import { Edm } from "odata-v4-server";
 import { Balance } from "./Balance";
 import { Candle } from "./Candle";
+import { Indicator } from "./Indicator";
 import { Roundtrip } from "./Roundtrip";
 
 export class Backtest {
@@ -89,6 +90,9 @@ export class Backtest {
 
     @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Balance)))
     public BalanceHistory: Balance[];
+
+    @Edm.Collection(Edm.EntityType(Edm.ForwardRef(() => Indicator)))
+    public Indicators: Indicator[];
 
     constructor(data?: {
         _id?: ObjectID;
