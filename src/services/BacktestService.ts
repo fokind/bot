@@ -1,18 +1,17 @@
-import {
-    Backtest as BacktestService,
-    ICandle,
-    Strategy,
-} from "crypto-backtest";
+import { Backtest, Strategy } from "crypto-backtest";
 import { Injectable } from "@nestjs/common";
 import { ObjectID } from "mongodb";
 import connect from "../connect";
-import { CreateBacktestDto } from "./dto/backtest.dto";
-import { IBacktest } from "./interfaces/backtest.interface";
+import { CreateBacktestDto } from "../dto/CreateBacktestDto";
+import { IBacktest } from "../interfaces/IBacktest";
+import { ICandle } from "../interfaces/ICandle";
+import { IRoundtrip } from "../interfaces/IRoundtrip";
+import { IBalanceItem } from "../interfaces/IBalanceItem";
 
 const collectionName = "backtest";
 
 @Injectable()
-export class BacktestsService {
+export class BacktestService {
     async findAll(): Promise<IBacktest[]> {
         return (await connect())
             .collection<IBacktest>(collectionName)
@@ -20,7 +19,7 @@ export class BacktestsService {
             .toArray();
     }
 
-    async finOne(id: string): Promise<IBacktest> {
+    async findOne(id: string): Promise<IBacktest> {
         const _id = new ObjectID(id);
         return (await connect())
             .collection<IBacktest>(collectionName)
@@ -62,7 +61,7 @@ export class BacktestsService {
             ) => string,
             indicatorInputs: JSON.parse(strategyIndicatorInputs),
         });
-        const backtestService = new BacktestService({
+        const backtestService = new Backtest({
             candles,
             strategy,
             initialBalance,
@@ -134,5 +133,59 @@ export class BacktestsService {
         );
         Object.assign(backtest, delta);
         return backtest;
+    }
+
+    async findCandles(backtestId: string): Promise<ICandle[]> {
+        const _id = new ObjectID(backtestId);
+        const db = await connect();
+        const backtest = await db
+            .collection<IBacktest>(collectionName)
+            .findOne({ _id });
+
+        const { exchange, currency, asset, period, begin, end } = backtest;
+
+        const collection = db.collection("candle");
+        const findQuery = {
+            exchange,
+            currency,
+            asset,
+            period,
+            time: { $gte: begin, $lte: end },
+        };
+
+        const items: ICandle[] = await collection
+            .find(findQuery)
+            .sort(Object.assign({ time: 1 }))
+            .toArray();
+
+        return items;
+    }
+
+    async findRoundtrips(backtestId: string): Promise<IRoundtrip[]> {
+        const _id = new ObjectID(backtestId);
+        const db = await connect();
+        const collection = db.collection("roundtrip");
+        const items: IRoundtrip[] = await collection
+            .find({
+                backtestId: _id,
+            })
+            .sort(Object.assign({ time: 1 }))
+            .toArray();
+
+        return items;
+    }
+
+    async findBalance(backtestId: string): Promise<IBalanceItem[]> {
+        const _id = new ObjectID(backtestId);
+        const db = await connect();
+        const collection = db.collection("balance");
+        const items: IBalanceItem[] = await collection
+            .find({
+                backtestId: _id,
+            })
+            .sort(Object.assign({ time: 1 }))
+            .toArray();
+
+        return items;
     }
 }
