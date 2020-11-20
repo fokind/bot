@@ -10,13 +10,35 @@ import { IBalanceItem } from "../interfaces/IBalanceItem";
 const collectionName = "backtest";
 
 export class BacktestService {
+    static async findAllIds(): Promise<string[]> {
+        return (await connect())
+            .collection(collectionName)
+            .find()
+            .project({
+                _id: 1,
+            })
+            .map((e) => (e._id as ObjectID).toHexString())
+            .toArray();
+    }
+
     static async findAll(): Promise<IBacktest[]> {
-        return (await connect()).collection(collectionName).find().toArray();
+        return (await connect())
+            .collection(collectionName)
+            .find()
+            .map((e) =>
+                Object.assign(e, {
+                    _id: (e._id as ObjectID).toHexString(),
+                }) as IBacktest,
+            )
+            .toArray();
     }
 
     static async findOne(id: string): Promise<IBacktest> {
         const _id = new ObjectID(id);
-        return (await connect()).collection(collectionName).findOne({ _id });
+        const item = await (await connect()).collection(collectionName).findOne({ _id });
+        return Object.assign(item, {
+            _id: (item._id as ObjectID).toHexString(),
+        }) as IBacktest;
     }
 
     static async create(body: ICreateBacktest): Promise<IBacktest> {
@@ -76,10 +98,9 @@ export class BacktestService {
             fee,
             initialBalance,
         };
-        const backtestId = (await db.collection(collectionName).insertOne(backtest)).insertedId;
-        backtest._id = backtestId;
+        const backtestId: ObjectID = (await db.collection(collectionName).insertOne(backtest)).insertedId;
         await db.collection("roundtrip").insertMany(roundtrips.map((e) => Object.assign(e, { backtestId })));
-        const balanceItems: any[] = roundtrips.map((e) => ({
+        const balanceItems: IBalanceItem[] = roundtrips.map((e) => ({
             time: e.end,
             available: e.closeAmount,
             backtestId,
@@ -109,7 +130,7 @@ export class BacktestService {
                 $set: delta,
             },
         );
-        Object.assign(backtest, delta);
+        backtest._id = backtestId.toHexString();
         return backtest;
     }
 
@@ -131,7 +152,7 @@ export class BacktestService {
 
         const items: ICandle[] = await collection
             .find(findQuery)
-            .sort(Object.assign({ time: 1 }))
+            .sort({ time: 1 })
             .toArray();
 
         return items;
@@ -145,7 +166,13 @@ export class BacktestService {
             .find({
                 backtestId: _id,
             })
-            .sort(Object.assign({ time: 1 }))
+            .sort({ time: 1 })
+            .map((e) =>
+                Object.assign(e, {
+                    _id: (e._id as ObjectID).toHexString(),
+                    backtestId: (e.backtestId as ObjectID).toHexString(),
+                }) as IRoundtrip,
+            )
             .toArray();
 
         return items;
@@ -159,7 +186,13 @@ export class BacktestService {
             .find({
                 backtestId: _id,
             })
-            .sort(Object.assign({ time: 1 }))
+            .sort({ time: 1 })
+            .map((e) =>
+                Object.assign(e, {
+                    _id: (e._id as ObjectID).toHexString(),
+                    backtestId: (e.backtestId as ObjectID).toHexString(),
+                }) as IBalanceItem,
+            )
             .toArray();
 
         return items;

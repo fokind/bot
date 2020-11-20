@@ -1,7 +1,7 @@
 import { ObjectID } from "mongodb";
 
 export interface IRoundtrip {
-    _id?: ObjectID;
+    _id?: string | ObjectID;
     begin: string;
     end: string;
     openPrice: number;
@@ -10,5 +10,5 @@ export interface IRoundtrip {
     closeAmount: number;
     fee: number;
     profit: number;
-    backtestId: ObjectID;
+    backtestId: string | ObjectID;
 }

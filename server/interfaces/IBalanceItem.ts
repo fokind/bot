@@ -1,8 +1,8 @@
 import { ObjectID } from "mongodb";
 
 export interface IBalanceItem {
-    _id?: ObjectID;
+    _id?: string | ObjectID;
     time: string;
     available: number;
-    backtestId: ObjectID;
+    backtestId: string | ObjectID;
 }

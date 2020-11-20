@@ -1,7 +1,7 @@
 import { ObjectID } from "mongodb";
 
 export interface ICandleImport {
-    _id?: ObjectID;
+    _id?: string | ObjectID;
     exchange: string;
     currency: string;
     asset: string;
