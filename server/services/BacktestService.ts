@@ -25,10 +25,11 @@ export class BacktestService {
         return (await connect())
             .collection(collectionName)
             .find()
-            .map((e) =>
-                Object.assign(e, {
-                    _id: (e._id as ObjectID).toHexString(),
-                }) as IBacktest,
+            .map(
+                (e) =>
+                    Object.assign(e, {
+                        _id: (e._id as ObjectID).toHexString(),
+                    }) as IBacktest,
             )
             .toArray();
     }
@@ -153,6 +154,12 @@ export class BacktestService {
         const items: ICandle[] = await collection
             .find(findQuery)
             .sort({ time: 1 })
+            .map(
+                (e) =>
+                    Object.assign(e, {
+                        _id: (e._id as ObjectID).toHexString(),
+                    }) as ICandle,
+            )
             .toArray();
 
         return items;
@@ -167,11 +174,12 @@ export class BacktestService {
                 backtestId: _id,
             })
             .sort({ time: 1 })
-            .map((e) =>
-                Object.assign(e, {
-                    _id: (e._id as ObjectID).toHexString(),
-                    backtestId: (e.backtestId as ObjectID).toHexString(),
-                }) as IRoundtrip,
+            .map(
+                (e) =>
+                    Object.assign(e, {
+                        _id: (e._id as ObjectID).toHexString(),
+                        backtestId: (e.backtestId as ObjectID).toHexString(),
+                    }) as IRoundtrip,
             )
             .toArray();
 
@@ -187,11 +195,12 @@ export class BacktestService {
                 backtestId: _id,
             })
             .sort({ time: 1 })
-            .map((e) =>
-                Object.assign(e, {
-                    _id: (e._id as ObjectID).toHexString(),
-                    backtestId: (e.backtestId as ObjectID).toHexString(),
-                }) as IBalanceItem,
+            .map(
+                (e) =>
+                    Object.assign(e, {
+                        _id: (e._id as ObjectID).toHexString(),
+                        backtestId: (e.backtestId as ObjectID).toHexString(),
+                    }) as IBalanceItem,
             )
             .toArray();
 

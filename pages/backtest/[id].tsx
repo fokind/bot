@@ -1,20 +1,27 @@
 import { GetStaticProps } from "next";
-import { List } from "fundamental-react";
+import PropTypes from "prop-types";
 import { BacktestService } from "../../server/services/BacktestService";
+import { IBacktest } from "../../server/interfaces/IBacktest";
+import { ICandle } from "../../server/interfaces/ICandle";
+import CandlestickChart from "../../components/CandlestickChart";
+import LineChart from "../../components/LineChart";
 
-export default function Backtest({ backtest }) {
+export default function Backtest({ backtest, candles }: { backtest: IBacktest; candles: ICandle[] }) {
     return (
-        <List>
-            <List.Item>
-                <List.Text>{backtest._id}</List.Text>
-            </List.Item>
-            <List.Item>
-                <List.Text>{backtest.begin}</List.Text>
-            </List.Item>
-            <List.Item>
-                <List.Text>{backtest.end}</List.Text>
-            </List.Item>
-        </List>
+        <>
+            <CandlestickChart
+                points={candles.slice(0, 100)}
+                height={160}
+                width={480}
+                period={backtest.period}
+            />
+            <LineChart
+                points={candles.slice(0, 100).map((e) => ({ value: e.close, time: e.time }))}
+                height={160}
+                width={480}
+                period={backtest.period}
+            />
+        </>
     );
 }
 
@@ -38,11 +45,23 @@ export const getStaticProps: GetStaticProps = async ({
         id: string;
     };
 }) => {
-    const backtest = await BacktestService.findOne(params.id);
+    const { id: backtestId } = params;
+    const backtest = await BacktestService.findOne(backtestId);
+    const candles = await BacktestService.findCandles(backtestId);
 
     return {
         props: {
             backtest,
+            candles,
         },
     };
 };
+
+Backtest.propTypes = {
+    backtest: PropTypes.object,
+    candles: PropTypes.array,
+};
+
+/*
+вернуть и показать в svg свечи, относящиеся к бэктесту
+*/
