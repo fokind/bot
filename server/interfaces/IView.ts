@@ -1,6 +1,5 @@
 import { ICandle } from "./ICandle";
-import { IIndicatorInput } from "./IIndicatorInput";
-import { IIndicatorOutput } from "./IIndicatorOutput";
+import { IIndicator } from "./IIndicator";
 
 export interface IView {
     exchange: string;
@@ -9,12 +8,6 @@ export interface IView {
     period: number;
     begin: string;
     end: string;
-    buy: string;
-    sell: string;
     candles: ICandle[];
-    indicators: Array<
-        IIndicatorInput & {
-            ouptut: IIndicatorOutput[];
-        }
-    >;
+    indicators: IIndicator[];
 }
