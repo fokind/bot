@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { IPoint } from "../../interfaces/IPoint";
 import _ from "lodash";
-import CCI from "./CCI";
+import CCI from "./cci_";
 
 const IndicatorChart = ({
     name,
