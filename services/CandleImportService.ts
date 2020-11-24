@@ -1,6 +1,6 @@
 import { CandlesImport } from "candles-import";
 import { ObjectID } from "mongodb";
-import connect from "../connect";
+import connect from "../utils/connect";
 import { ICreateCandleImport } from "../interfaces/ICreateCandleImport";
 import { ICandleImport } from "../interfaces/ICandleImport";
 

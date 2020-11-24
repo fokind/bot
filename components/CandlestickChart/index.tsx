@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { ICandle } from "../../server/interfaces/ICandle";
+import { ICandle } from "../../interfaces/ICandle";
 import * as d3 from "d3";
 import _ from "lodash";
 import moment from "moment";

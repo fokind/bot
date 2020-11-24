@@ -1,6 +1,6 @@
 import { IdealBacktest } from "crypto-backtest";
 import { ObjectID } from "mongodb";
-import connect from "../connect";
+import connect from "../utils/connect";
 import { ICreateIdealBacktest } from "../interfaces/ICreateIdealBacktest";
 import { IIdealBacktest } from "../interfaces/IIdealBacktest";
 import { ICandle } from "../interfaces/ICandle";

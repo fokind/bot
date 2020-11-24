@@ -1,9 +1,9 @@
 import { GetServerSideProps } from "next";
 import PropTypes from "prop-types";
-import { ICandle } from "../../server/interfaces/ICandle";
+import { ICandle } from "../../interfaces/ICandle";
 import CandlestickChart from "../../components/CandlestickChart";
 import LineChart from "../../components/LineChart";
-import { AnalysisService } from "../../server/services/AnalysisService";
+import { AnalysisService } from "../../services/AnalysisService";
 
 export default function View({ period, candles }: { period: number; candles: ICandle[] }) {
     return (

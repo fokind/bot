@@ -1,8 +1,8 @@
 import { GetStaticProps } from "next";
 import PropTypes from "prop-types";
-import { BacktestService } from "../../server/services/BacktestService";
-import { IBacktest } from "../../server/interfaces/IBacktest";
-import { ICandle } from "../../server/interfaces/ICandle";
+import { BacktestService } from "../../services/BacktestService";
+import { IBacktest } from "../../interfaces/IBacktest";
+import { ICandle } from "../../interfaces/ICandle";
 import CandlestickChart from "../../components/CandlestickChart";
 import LineChart from "../../components/LineChart";
 

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { IdealBacktestService } from "../../../server/services/IdealBacktestService"
+import { IdealBacktestService } from "../../../services/IdealBacktestService"
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     switch (req.method) {

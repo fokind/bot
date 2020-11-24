@@ -1,5 +1,5 @@
 import { ObjectID } from "mongodb";
-import connect from "../connect";
+import connect from "../utils/connect";
 import { ICandle } from "../interfaces/ICandle";
 
 const collectionName = "candle";

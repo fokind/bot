@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { IPoint } from "../../server/interfaces/IPoint";
+import { IPoint } from "../../interfaces/IPoint";
 import * as d3 from "d3";
 import _ from "lodash";
 import moment from "moment";

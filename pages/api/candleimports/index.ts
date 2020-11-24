@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { CandleImportService } from "../../../server/services/CandleImportService"
+import { CandleImportService } from "../../../services/CandleImportService"
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
     switch (req.method) {
