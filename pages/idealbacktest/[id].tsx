@@ -70,7 +70,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const { exchange, currency, asset, period, begin, end } = backtest;
 
     const indicatorInputs: IIndicatorInput[] = indicatorsString
-        ? indicatorsString.split(",").map((e) => {
+        ? indicatorsString.split(" ").map((e) => {
               const { index } = e.match(/\(/);
               return {
                   name: e.slice(0, index),
