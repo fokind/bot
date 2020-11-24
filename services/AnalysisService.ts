@@ -17,7 +17,6 @@ export class AnalysisService {
         end: string;
         indicatorInputs: IIndicatorInput[];
     }): Promise<IView> {
-        // запросить свечи
         const { exchange, currency, asset, period, begin, end, indicatorInputs } = options;
         const momentBegin = moment.utc(begin);
         const start = _.max(indicatorInputs.map((e) => IndicatorService.getStart(e.name, e.options)));

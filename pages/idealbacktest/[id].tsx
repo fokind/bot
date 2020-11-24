@@ -24,7 +24,6 @@ export default function Ideal({
     indicators: IIndicator[];
 }) {
     console.log(backtest);
-    console.log(roundtrips);
     const width = 1200;
     return (
         <>
@@ -71,10 +70,14 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const { exchange, currency, asset, period, begin, end } = backtest;
 
     const indicatorInputs: IIndicatorInput[] = indicatorsString
-        ? indicatorsString.split(" ").map((e) => {
+        ? indicatorsString.split(",").map((e) => {
+              const { index } = e.match(/\(/);
               return {
-                  name: "cci",
-                  options: [14],
+                  name: e.slice(0, index),
+                  options: e
+                      .slice(index + 1, e.length - 1)
+                      .split(",")
+                      .map((e1) => +e1),
               };
           })
         : [];
