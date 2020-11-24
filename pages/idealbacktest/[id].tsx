@@ -38,6 +38,7 @@ export default function Ideal({
                 {indicators.map((e, i) => (
                     <IndicatorChart
                         key={i}
+                        name={e.name}
                         points={e.output.map((e) => ({
                             time: e.time,
                             value: e.values[0],
