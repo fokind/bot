@@ -10,7 +10,7 @@ export default function Backtest({ backtest, candles }: { backtest: IBacktest; c
     return (
         <>
             <CandlestickChart
-                points={candles.slice(0, 100)}
+                candles={candles.slice(0, 100)}
                 height={160}
                 width={480}
                 period={backtest.period}

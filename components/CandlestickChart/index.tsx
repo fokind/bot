@@ -32,60 +32,64 @@ const CandlestickChart = ({
 
     return (
         <svg height={height} width={width}>
-            {roundtrips
-                ? roundtrips.map((e, i) => {
-                      const x1 = scaleTime(moment.utc(e.begin).toDate()) + tickWidth / 2;
-                      const x2 = scaleTime(moment.utc(e.end).toDate()) + tickWidth / 2;
-                      const bullish = e.profit > 0;
-                      return (
-                          <g key={i}>
-                              <rect
-                                  fill="none"
-                                  stroke={bullish ? "green" : "red"}
-                                  strokeWidth={1}
-                                  x={x1}
-                                  y={bullish ? scaleValue(e.closePrice) : scaleValue(e.openPrice)}
-                                  height={
-                                      bullish
-                                          ? scaleValue(e.openPrice) - scaleValue(e.closePrice)
-                                          : scaleValue(e.closePrice) - scaleValue(e.openPrice)
-                                  }
-                                  width={x2 - x1}
-                              />
-                          </g>
-                      );
-                  })
-                : ""}
-            {candles.map((e, i) => {
-                const x = scaleTime(moment.utc(e.time).toDate()) + tickWidth / 2;
-                const bullish = e.close >= e.open;
-                return (
-                    <g key={i}>
-                        <line
-                            fill={bullish ? "green" : "red"}
-                            stroke={bullish ? "green" : "red"}
-                            strokeWidth={1}
-                            x1={x}
-                            x2={x}
-                            y1={scaleValue(e.low)}
-                            y2={scaleValue(e.high)}
-                        />
-                        <rect
-                            fill={bullish ? "green" : "red"}
-                            stroke={bullish ? "green" : "red"}
-                            strokeWidth={0}
-                            x={x - (tickWidth / 2) * bodyWidth}
-                            y={bullish ? scaleValue(e.close) : scaleValue(e.open)}
-                            height={
-                                bullish
-                                    ? scaleValue(e.open) - scaleValue(e.close)
-                                    : scaleValue(e.close) - scaleValue(e.open)
-                            }
-                            width={tickWidth * bodyWidth}
-                        />
-                    </g>
-                );
-            })}
+            <g>
+                {roundtrips
+                    ? roundtrips.map((e, i) => {
+                          const x1 = scaleTime(moment.utc(e.begin).toDate()) + tickWidth / 2;
+                          const x2 = scaleTime(moment.utc(e.end).toDate()) + tickWidth / 2;
+                          const bullish = e.profit > 0;
+                          return (
+                              <g key={i}>
+                                  <rect
+                                      fill="none"
+                                      stroke={bullish ? "green" : "red"}
+                                      strokeWidth={1}
+                                      x={x1}
+                                      y={bullish ? scaleValue(e.closePrice) : scaleValue(e.openPrice)}
+                                      height={
+                                          bullish
+                                              ? scaleValue(e.openPrice) - scaleValue(e.closePrice)
+                                              : scaleValue(e.closePrice) - scaleValue(e.openPrice)
+                                      }
+                                      width={x2 - x1}
+                                  />
+                              </g>
+                          );
+                      })
+                    : ""}
+            </g>
+            <g>
+                {candles.map((e, i) => {
+                    const x = scaleTime(moment.utc(e.time).toDate()) + tickWidth / 2;
+                    const bullish = e.close >= e.open;
+                    return (
+                        <g key={i}>
+                            <line
+                                fill={bullish ? "green" : "red"}
+                                stroke={bullish ? "green" : "red"}
+                                strokeWidth={1}
+                                x1={x}
+                                x2={x}
+                                y1={scaleValue(e.low)}
+                                y2={scaleValue(e.high)}
+                            />
+                            <rect
+                                fill={bullish ? "green" : "red"}
+                                stroke={bullish ? "green" : "red"}
+                                strokeWidth={0}
+                                x={x - (tickWidth / 2) * bodyWidth}
+                                y={bullish ? scaleValue(e.close) : scaleValue(e.open)}
+                                height={
+                                    bullish
+                                        ? scaleValue(e.open) - scaleValue(e.close)
+                                        : scaleValue(e.close) - scaleValue(e.open)
+                                }
+                                width={tickWidth * bodyWidth}
+                            />
+                        </g>
+                    );
+                })}
+            </g>
         </svg>
     );
 };

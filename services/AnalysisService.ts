@@ -57,7 +57,11 @@ export class AnalysisService {
             begin,
             end,
             candles: candles.filter((e) => moment.utc(e.time).isSameOrAfter(momentBegin)),
-            indicators,
+            indicators: indicators.map(e => ({
+                name: e.name,
+                options: e.options,
+                output: e.output.filter((e) => moment.utc(e.time).isSameOrAfter(momentBegin))
+            })),
         };
     }
 }
