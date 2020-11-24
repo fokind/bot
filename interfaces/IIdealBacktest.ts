@@ -12,4 +12,5 @@ export interface IIdealBacktest {
     initialBalance: number;
     finalBalance?: number;
     tradesCount?: number;
+    candlesCount?: number;
 }

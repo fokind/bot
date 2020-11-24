@@ -11,12 +11,82 @@ const collectionName = "idealBacktest";
 
 export class IdealBacktestService {
     static async findAll(): Promise<IIdealBacktest[]> {
-        return (await connect()).collection(collectionName).find().toArray();
+        return (await connect())
+            .collection(collectionName)
+            .find()
+            .map((e) => {
+                const {
+                    _id,
+                    exchange,
+                    currency,
+                    asset,
+                    period,
+                    begin,
+                    end,
+                    fee,
+                    initialBalance,
+                    finalBalance,
+                    tradesCount,
+                    candlesCount,
+                }: IIdealBacktest = e;
+                return {
+                    _id: (_id as ObjectID).toHexString(),
+                    exchange,
+                    currency,
+                    asset,
+                    period,
+                    begin,
+                    end,
+                    fee,
+                    initialBalance,
+                    finalBalance,
+                    tradesCount,
+                    candlesCount,
+                };
+            })
+            .toArray();
     }
 
     static async findOne(id: string): Promise<IIdealBacktest> {
         const _id = new ObjectID(id);
-        return (await connect()).collection(collectionName).findOne({ _id });
+        const {
+            exchange,
+            currency,
+            asset,
+            period,
+            begin,
+            end,
+            fee,
+            initialBalance,
+            finalBalance,
+            tradesCount,
+        }: IIdealBacktest = await (await connect()).collection(collectionName).findOne({ _id });
+        // TODO временно
+        const { length: candlesCount } = await (await connect())
+            .collection("candle")
+            .find({
+                exchange,
+                currency,
+                asset,
+                period,
+                time: { $gte: begin, $lte: end },
+            })
+            .toArray();
+
+        return {
+            _id: (_id as ObjectID).toHexString(),
+            exchange,
+            currency,
+            asset,
+            period,
+            begin,
+            end,
+            fee,
+            initialBalance,
+            finalBalance,
+            tradesCount,
+            candlesCount,
+        };
     }
 
     static async create(body: ICreateIdealBacktest): Promise<IIdealBacktest> {
@@ -58,8 +128,6 @@ export class IdealBacktestService {
 
         const backtestId = (await db.collection(collectionName).insertOne(backtest)).insertedId;
 
-        backtest._id = backtestId;
-
         await db.collection("roundtrip").insertMany(roundtrips.map((e) => Object.assign(e, { backtestId })));
 
         const balanceItems: IBalanceItem[] = roundtrips.map((e) => ({
@@ -89,8 +157,8 @@ export class IdealBacktestService {
             },
         );
 
-        Object.assign(backtest, delta);
-
+        backtest.candlesCount = candles.length;
+        backtest._id = backtestId.toHexString();
         return backtest;
     }
 
@@ -112,13 +180,19 @@ export class IdealBacktestService {
 
         const items: ICandle[] = await collection
             .find(findQuery)
-            .sort(Object.assign({ time: 1 }))
+            .sort({ time: 1 })
+            .map(
+                (e) =>
+                    Object.assign(e, {
+                        _id: (e._id as ObjectID).toHexString(),
+                    }) as ICandle,
+            )
             .toArray();
 
         return items;
     }
 
-    async findRoundtrips(backtestId: string): Promise<IRoundtrip[]> {
+    static async findRoundtrips(backtestId: string): Promise<IRoundtrip[]> {
         const _id = new ObjectID(backtestId);
         const db = await connect();
         const collection = db.collection("roundtrip");
@@ -126,13 +200,20 @@ export class IdealBacktestService {
             .find({
                 backtestId: _id,
             })
-            .sort(Object.assign({ time: 1 }))
+            .sort({ time: 1 })
+            .map(
+                (e) =>
+                    Object.assign(e, {
+                        _id: (e._id as ObjectID).toHexString(),
+                        backtestId: (e.backtestId as ObjectID).toHexString(),
+                    }) as IRoundtrip,
+            )
             .toArray();
 
         return items;
     }
 
-    async findBalance(backtestId: string): Promise<IBalanceItem[]> {
+    static async findBalance(backtestId: string): Promise<IBalanceItem[]> {
         const _id = new ObjectID(backtestId);
         const db = await connect();
         const collection = db.collection("balance");
@@ -140,7 +221,14 @@ export class IdealBacktestService {
             .find({
                 backtestId: _id,
             })
-            .sort(Object.assign({ time: 1 }))
+            .sort({ time: 1 })
+            .map(
+                (e) =>
+                    Object.assign(e, {
+                        _id: (e._id as ObjectID).toHexString(),
+                        backtestId: (e.backtestId as ObjectID).toHexString(),
+                    }) as IBalanceItem,
+            )
             .toArray();
 
         return items;

@@ -3,34 +3,62 @@ import { ICandle } from "../../interfaces/ICandle";
 import * as d3 from "d3";
 import _ from "lodash";
 import moment from "moment";
+import { IRoundtrip } from "../../interfaces/IRoundtrip";
+
+// TODO roundtrips
 
 const CandlestickChart = ({
-    points,
+    candles,
     height,
     period,
     width,
+    roundtrips,
 }: {
-    points: ICandle[];
+    candles: ICandle[];
     height: number;
     width: number;
     period: number;
+    roundtrips?: IRoundtrip[];
 }) => {
-    const min = _.min(points.map((e) => e.low));
-    const max = _.max(points.map((e) => e.high));
+    const min = _.min(candles.map((e) => e.low));
+    const max = _.max(candles.map((e) => e.high));
     const scaleValue = d3.scaleLinear([min, max], [height, 0]);
-    const first = _.first(points);
+    const first = _.first(candles);
     const begin = moment.utc(first.time).toDate();
-    const end = moment.utc(_.last(points).time).add(period, "minutes").toDate();
+    const end = moment.utc(_.last(candles).time).add(period, "minutes").toDate();
     const scaleTime = d3.scaleTime([begin, end], [0, width]);
     const tickWidth = scaleTime(moment.utc(first.time).add(period, "minutes").toDate());
     const bodyWidth = 0.8;
 
     return (
         <svg height={height} width={width}>
-            {points.map((e, i) => {
+            {roundtrips
+                ? roundtrips.map((e, i) => {
+                      const x1 = scaleTime(moment.utc(e.begin).toDate()) + tickWidth / 2;
+                      const x2 = scaleTime(moment.utc(e.end).toDate()) + tickWidth / 2;
+                      const bullish = e.profit > 0;
+                      return (
+                          <g key={i}>
+                              <rect
+                                  fill="none"
+                                  stroke={bullish ? "green" : "red"}
+                                  strokeWidth={1}
+                                  x={x1}
+                                  y={bullish ? scaleValue(e.closePrice) : scaleValue(e.openPrice)}
+                                  height={
+                                      bullish
+                                          ? scaleValue(e.openPrice) - scaleValue(e.closePrice)
+                                          : scaleValue(e.closePrice) - scaleValue(e.openPrice)
+                                  }
+                                  width={x2 - x1}
+                              />
+                          </g>
+                      );
+                  })
+                : ""}
+            {candles.map((e, i) => {
                 const x = scaleTime(moment.utc(e.time).toDate()) + tickWidth / 2;
                 const bullish = e.close >= e.open;
-
                 return (
                     <g key={i}>
                         <line
@@ -63,10 +91,11 @@ const CandlestickChart = ({
 };
 
 CandlestickChart.propTypes = {
-    points: PropTypes.array.isRequired,
+    candles: PropTypes.array.isRequired,
     height: PropTypes.number.isRequired,
     width: PropTypes.number.isRequired,
     period: PropTypes.number.isRequired,
+    roundtrips: PropTypes.array,
 };
 
 export default CandlestickChart;
