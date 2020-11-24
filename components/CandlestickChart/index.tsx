@@ -43,7 +43,7 @@ const CandlestickChart = ({
                                   <rect
                                       fill="none"
                                       stroke={bullish ? "green" : "red"}
-                                      strokeWidth={1}
+                                      strokeWidth="1"
                                       x={x1}
                                       y={bullish ? scaleValue(e.closePrice) : scaleValue(e.openPrice)}
                                       height={
@@ -67,7 +67,7 @@ const CandlestickChart = ({
                             <line
                                 fill={bullish ? "green" : "red"}
                                 stroke={bullish ? "green" : "red"}
-                                strokeWidth={1}
+                                strokeWidth="1"
                                 x1={x}
                                 x2={x}
                                 y1={scaleValue(e.low)}
@@ -75,8 +75,7 @@ const CandlestickChart = ({
                             />
                             <rect
                                 fill={bullish ? "green" : "red"}
-                                stroke={bullish ? "green" : "red"}
-                                strokeWidth={0}
+                                strokeWidth="0"
                                 x={x - (tickWidth / 2) * bodyWidth}
                                 y={bullish ? scaleValue(e.close) : scaleValue(e.open)}
                                 height={

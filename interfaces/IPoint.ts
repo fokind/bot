@@ -1,4 +1,4 @@
 export interface IPoint {
     time: string;
-    value: any;
+    values: number[];
 }

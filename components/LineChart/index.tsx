@@ -15,8 +15,8 @@ const LineChart = ({
     width: number;
     period: number;
 }) => {
-    const min = _.min(points.map((e) => e.value));
-    const max = _.max(points.map((e) => e.value));
+    const min = _.min(points.map((e) => e.values[0]));
+    const max = _.max(points.map((e) => e.values[0]));
     const scaleValue = d3.scaleLinear([min, max], [height, 0]);
 
     const first = _.first(points);
@@ -25,8 +25,8 @@ const LineChart = ({
     const scaleTime = d3.scaleTime([begin, end], [0, width]);
 
     const path = d3.path();
-    path.moveTo(scaleTime(begin), scaleValue(first.value));
-    points.slice(1).forEach((e) => path.lineTo(scaleTime(moment.utc(e.time).toDate()), scaleValue(e.value)));
+    path.moveTo(scaleTime(begin), scaleValue(first.values[0]));
+    points.slice(1).forEach((e) => path.lineTo(scaleTime(moment.utc(e.time).toDate()), scaleValue(e.values[0])));
 
     return (
         <svg height={height} width={width}>

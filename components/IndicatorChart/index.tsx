@@ -1,7 +1,8 @@
 import PropTypes from "prop-types";
 import { IPoint } from "../../interfaces/IPoint";
 import _ from "lodash";
-import CCI from "./cci_";
+import CCI from "./cci";
+import MACD from "./macd";
 
 const IndicatorChart = ({
     name,
@@ -35,6 +36,9 @@ const IndicatorChart = ({
                                 oversoldZone={oversoldZone}
                             />
                         );
+
+                    case "macd":
+                        return <MACD points={points} height={height} width={width} period={period} />;
 
                     default:
                         break;

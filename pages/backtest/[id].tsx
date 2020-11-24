@@ -16,7 +16,7 @@ export default function Backtest({ backtest, candles }: { backtest: IBacktest; c
                 period={backtest.period}
             />
             <LineChart
-                points={candles.slice(0, 100).map((e) => ({ value: e.close, time: e.time }))}
+                points={candles.slice(0, 100).map((e) => ({ values: [e.close], time: e.time }))}
                 height={160}
                 width={480}
                 period={backtest.period}

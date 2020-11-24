@@ -41,7 +41,7 @@ export default function Ideal({
                         name={e.name}
                         points={e.output.map((e) => ({
                             time: e.time,
-                            value: e.values[0],
+                            values: e.values,
                         }))}
                         height={120}
                         width={width}
@@ -59,13 +59,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     const { params, query } = (context as unknown) as {
         params: { id: string };
         query: {
-            start: string;
-            end: string;
+            skip: string;
+            top: string;
             indicators: string;
         };
     };
     const { id } = params;
-    const { start: sliceStart, end: sliceEnd, indicators: indicatorsString } = query;
+    const { skip, top, indicators: indicatorsString } = query;
 
     const backtest = await IdealBacktestService.findOne(id);
     const { exchange, currency, asset, period, begin, end } = backtest;
@@ -93,7 +93,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         indicatorInputs,
     });
 
-    const candles = (await IdealBacktestService.findCandles(id)).slice(+sliceStart, +sliceEnd);
+    const candles = (await IdealBacktestService.findCandles(id)).slice(+skip, +skip + +top);
     const first = moment.utc(_.first(candles).time);
     const last = moment.utc(_.last(candles).time);
     const roundtrips = (await IdealBacktestService.findRoundtrips(id)).filter(

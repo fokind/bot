@@ -10,7 +10,7 @@ export default function View({ period, candles }: { period: number; candles: ICa
         <>
             <CandlestickChart candles={candles.slice(0, 100)} height={160} width={480} period={period} />
             <LineChart
-                points={candles.slice(0, 100).map((e) => ({ value: e.close, time: e.time }))}
+                points={candles.slice(0, 100).map((e) => ({ values: [e.close], time: e.time }))}
                 height={160}
                 width={480}
                 period={period}

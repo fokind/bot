@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { IPoint } from "../../interfaces/IPoint";
+import { ICCI } from "../../interfaces/indicators/ICCI";
 import * as d3 from "d3";
 import _ from "lodash";
 import moment from "moment";
@@ -19,19 +20,26 @@ const CCI = ({
     overboughtZone?: number;
     oversoldZone?: number;
 }) => {
-    const min = _.min(points.map((e) => e.value));
-    const max = _.max(points.map((e) => e.value));
+    const indicatorPoints = points.map(
+        (e) =>
+            ({
+                time: e.time,
+                value: e.values[0],
+            } as ICCI),
+    );
+    const min = _.min(indicatorPoints.map((e) => e.value));
+    const max = _.max(indicatorPoints.map((e) => e.value));
     const scaleValue = d3.scaleLinear([min, max], [height, 0]);
-    const first = _.first(points);
+    const first = _.first(indicatorPoints);
     const begin = moment.utc(first.time).toDate();
-    const end = moment.utc(_.last(points).time).add(period, "minutes").toDate();
+    const end = moment.utc(_.last(indicatorPoints).time).add(period, "minutes").toDate();
     const scaleTime = d3.scaleTime([begin, end], [0, width]);
     const tickWidth = scaleTime(moment.utc(first.time).add(period, "minutes").toDate());
     const bodyWidth = 0.8;
 
     return (
         <g>
-            {points.map((e, i) => {
+            {indicatorPoints.map((e, i) => {
                 const x = scaleTime(moment.utc(e.time).toDate()) + tickWidth / 2;
                 const bullish = overboughtZone && e.value >= overboughtZone;
                 const bearish = oversoldZone && e.value <= oversoldZone;
@@ -45,17 +53,15 @@ const CCI = ({
                 }
 
                 return (
-                    <g key={i}>
-                        <rect
-                            fill={fill}
-                            stroke={fill}
-                            strokeWidth={0}
-                            x={x - (tickWidth / 2) * bodyWidth}
-                            y={scaleValue(Math.max(0, e.value))}
-                            height={Math.abs(scaleValue(e.value) - scaleValue(0))}
-                            width={tickWidth * bodyWidth}
-                        />
-                    </g>
+                    <rect
+                        key={i}
+                        fill={fill}
+                        strokeWidth="0"
+                        x={x - (tickWidth / 2) * bodyWidth}
+                        y={scaleValue(Math.max(0, e.value))}
+                        height={Math.abs(scaleValue(e.value) - scaleValue(0))}
+                        width={tickWidth * bodyWidth}
+                    />
                 );
             })}
         </g>
