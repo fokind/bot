@@ -1,13 +1,11 @@
-import PropTypes from "prop-types";
 import { ICandle } from "../../interfaces/ICandle";
 import * as d3 from "d3";
 import _ from "lodash";
 import moment from "moment";
 import { IRoundtrip } from "../../interfaces/IRoundtrip";
+import RoundtripLine from "./RoundtripLine";
 
-// TODO roundtrips
-
-const CandlestickChart = ({
+function CandlestickChart({
     candles,
     height,
     period,
@@ -19,7 +17,7 @@ const CandlestickChart = ({
     width: number;
     period: number;
     roundtrips?: IRoundtrip[];
-}) => {
+}) {
     const min = _.min(candles.map((e) => e.low));
     const max = _.max(candles.map((e) => e.high));
     const scaleValue = d3.scaleLinear([min, max], [height, 0]);
@@ -32,32 +30,16 @@ const CandlestickChart = ({
 
     return (
         <svg height={height} width={width}>
-            <g>
-                {roundtrips
-                    ? roundtrips.map((e, i) => {
-                          const x1 = scaleTime(moment.utc(e.begin).toDate()) + tickWidth / 2;
-                          const x2 = scaleTime(moment.utc(e.end).toDate()) + tickWidth / 2;
-                          const bullish = e.profit > 0;
-                          return (
-                              <g key={i}>
-                                  <rect
-                                      fill="none"
-                                      stroke={bullish ? "green" : "red"}
-                                      strokeWidth="1"
-                                      x={x1}
-                                      y={bullish ? scaleValue(e.closePrice) : scaleValue(e.openPrice)}
-                                      height={
-                                          bullish
-                                              ? scaleValue(e.openPrice) - scaleValue(e.closePrice)
-                                              : scaleValue(e.closePrice) - scaleValue(e.openPrice)
-                                      }
-                                      width={x2 - x1}
-                                  />
-                              </g>
-                          );
-                      })
-                    : ""}
-            </g>
+            {roundtrips ? (
+                <RoundtripLine
+                    roundtrips={roundtrips}
+                    scaleValue={scaleValue}
+                    scaleTime={scaleTime}
+                    tickWidth={tickWidth}
+                />
+            ) : (
+                ""
+            )}
             <g>
                 {candles.map((e, i) => {
                     const x = scaleTime(moment.utc(e.time).toDate()) + tickWidth / 2;
@@ -91,14 +73,6 @@ const CandlestickChart = ({
             </g>
         </svg>
     );
-};
-
-CandlestickChart.propTypes = {
-    candles: PropTypes.array.isRequired,
-    height: PropTypes.number.isRequired,
-    width: PropTypes.number.isRequired,
-    period: PropTypes.number.isRequired,
-    roundtrips: PropTypes.array,
-};
+}
 
 export default CandlestickChart;

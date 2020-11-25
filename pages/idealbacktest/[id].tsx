@@ -11,6 +11,7 @@ import moment from "moment";
 import { IIndicator } from "../../interfaces/IIndicator";
 import { IIndicatorInput } from "../../interfaces/IIndicatorInput";
 import { AnalysisService } from "../../services/AnalysisService";
+import { useEffect, useRef, useState } from "react";
 
 export default function Ideal({
     backtest,
@@ -24,9 +25,16 @@ export default function Ideal({
     indicators: IIndicator[];
 }) {
     console.log(backtest);
-    const width = 1200;
+
+    const ref = useRef(null);
+    const [width, setWidth] = useState(0);
+
+    useEffect(() => {
+        setWidth(ref.current ? ref.current.offsetWidth : 0);
+    }, [ref.current]);
+
     return (
-        <>
+        <div ref={ref}>
             <CandlestickChart
                 candles={candles}
                 height={480}
@@ -34,7 +42,7 @@ export default function Ideal({
                 period={backtest.period}
                 roundtrips={roundtrips}
             />
-            <>
+            <div>
                 {indicators.map((e, i) => (
                     <IndicatorChart
                         key={i}
@@ -50,8 +58,8 @@ export default function Ideal({
                         oversoldZone={-100}
                     />
                 ))}
-            </>
-        </>
+            </div>
+        </div>
     );
 }
 
