@@ -6,10 +6,10 @@ export interface ICreateBacktest {
     begin: string;
     end: string;
     strategyName: string;
-    strategyWarmup: number;
     strategyCode: string;
     strategyIndicatorInputs: string;
     stoplossLevel: number;
     fee: number;
     initialBalance: number;
+    trailingStop: boolean;
 }

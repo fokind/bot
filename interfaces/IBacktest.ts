@@ -9,7 +9,6 @@ export interface IBacktest {
     begin: string;
     end: string;
     strategyName: string;
-    strategyWarmup: number;
     strategyCode: string;
     strategyIndicatorInputs: string;
     stoplossLevel: number;

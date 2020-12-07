@@ -1,10 +1,11 @@
-import { Backtest, Strategy } from "crypto-backtest";
+import { Backtest } from "crypto-backtest";
 import { ObjectID } from "mongodb";
 import connect from "../utils/connect";
 import { ICreateBacktest } from "../interfaces/ICreateBacktest";
 import { IBacktest } from "../interfaces/IBacktest";
 import { ICandle } from "../interfaces/ICandle";
 import { IRoundtrip } from "../interfaces/IRoundtrip";
+import { IIndicatorOutput } from "../interfaces/mongodb/IIndicatorOutput";
 import { IBalanceItem } from "../interfaces/IBalanceItem";
 
 const collectionName = "backtest";
@@ -43,11 +44,17 @@ export class BacktestService {
     }
 
     static async create(body: ICreateBacktest): Promise<IBacktest> {
+        // валидировать
+        // выполнить вычисления
+        // собрать полный backtest
+        // сохранить в БД получить идентификатор
+        // проставить везде связи и сохранить
+        // недостаток схемы в том, что сначала нужно было бы сохранить только входные параметры, а затем отдельно вернуть результаты
+
         const {
             initialBalance,
             fee,
             strategyName,
-            strategyWarmup,
             strategyCode,
             strategyIndicatorInputs, // JSON, нужно парсить
             stoplossLevel,
@@ -57,6 +64,7 @@ export class BacktestService {
             period,
             begin,
             end,
+            trailingStop,
         } = body;
         const db = await connect();
         const candles: ICandle[] = await db
@@ -70,20 +78,17 @@ export class BacktestService {
             })
             .sort({ time: 1 })
             .toArray();
-        const strategy = new Strategy({
-            warmup: 1,
-            execute: new Function("data", strategyCode) as (data: any) => string,
-            indicatorInputs: JSON.parse(strategyIndicatorInputs),
-        });
         const backtestService = new Backtest({
             candles,
-            strategy,
+            strategyCode,
+            indicatorInputs: JSON.parse(strategyIndicatorInputs),
             initialBalance,
             stoplossLevel,
             fee,
+            trailingStop,
         });
         await backtestService.execute();
-        const { roundtrips, maxDrawDown, maxLosingSeriesLength } = backtestService;
+        const { roundtrips, maxDrawDown, maxLosingSeriesLength, indicatorOutputs } = backtestService;
         const backtest: IBacktest = {
             exchange,
             currency,
@@ -92,7 +97,6 @@ export class BacktestService {
             begin,
             end,
             strategyName,
-            strategyWarmup,
             strategyCode,
             strategyIndicatorInputs, // JSON, нужно парсить
             stoplossLevel,
@@ -100,6 +104,12 @@ export class BacktestService {
             initialBalance,
         };
         const backtestId: ObjectID = (await db.collection(collectionName).insertOne(backtest)).insertedId;
+        const indicatorKeys = Object.keys(indicatorOutputs);
+        await Promise.all(indicatorKeys.map(key => {
+            const outputs: IIndicatorOutput[] = indicatorOutputs[key].map(e => Object.assign({}, e, { key, backtestId }));
+            return db.collection("indicatorOutput").insertMany(outputs) as Promise<void>;
+        }));
+
         await db.collection("roundtrip").insertMany(roundtrips.map((e) => Object.assign(e, { backtestId })));
         const balanceItems: IBalanceItem[] = roundtrips.map((e) => ({
             time: e.end,
@@ -131,8 +141,8 @@ export class BacktestService {
                 $set: delta,
             },
         );
-        backtest._id = backtestId.toHexString();
-        return backtest;
+
+        return Object.assign(backtest, delta, { _id: backtestId.toHexString() });
     }
 
     static async findCandles(backtestId: string): Promise<ICandle[]> {

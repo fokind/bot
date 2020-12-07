@@ -10,6 +10,10 @@
     "bugs": {
         "url": "https://github.com/fokind/bot"
     },
+    "author": {
+        "name": "Dmitry Fokin"
+    },
+    "license": "MIT",
     "scripts": {
         "dev": "next dev",
         "build": "next build",
@@ -20,7 +24,7 @@
         "@zeit/next-css": "^1.0.1",
         "axios": "^0.21.0",
         "candles-import": "^1.0.0-alpha",
-        "crypto-backtest": "^1.1.1-alpha",
+        "crypto-backtest": "file:../backtest",
         "d3": "^6.2.0",
         "dotenv": "^8.2.0",
         "fundamental-react": "^0.13.1",
