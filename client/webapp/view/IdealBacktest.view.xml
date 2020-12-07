@@ -3,11 +3,8 @@
     xmlns:core="sap.ui.core"
     xmlns:l="sap.ui.layout"
     xmlns:form="sap.ui.layout.form"
-    xmlns:codeeditor="sap.ui.codeeditor"
-    xmlns:t="sap.ui.table"
-    xmlns:chart="openui5.financial.chart"
     xmlns="sap.m" displayBlock="true">
-    <Page title="Ideal Backtest" enableScrolling="false" showNavButton="true" navButtonPress="onBackPress" showHeader="true">
+    <Page title="Ideal Backtest" enableScrolling="false" showNavButton="true" navButtonPress="onBackPress" showHeader="true" binding="{/}">
         <headerContent>
             <Button icon="sap-icon://copy" text="Clone" press="onClonePress"/>
         </headerContent>
@@ -90,22 +87,6 @@
                                     </form:FormContainer>
                                 </form:formContainers>
                             </form:Form>
-                        </l:SplitPane>
-                    </l:PaneContainer>
-                    <l:PaneContainer>
-                        <l:SplitPane>
-                            <VBox>
-                                <chart:Chart id="candlestickChart" height="240px" padding="5 20 25 60" start="{begin}" end="{end}" period="{period}">
-                                    <chart:CandlestickChart items="{Candles}">
-                                        <chart:Candle time="{time}" open="{open}" high="{high}" low="{low}" close="{close}"/>
-                                    </chart:CandlestickChart>
-                                </chart:Chart>
-                                <chart:Chart id="balanceHistoryChart" height="120px" padding="5 20 25 60" start="{begin}" end="{end}" period="{period}">
-                                    <chart:SteppedLineChart items="{BalanceHistory}">
-                                        <chart:LineChartItem time="{time}" value="{available}"/>
-                                    </chart:SteppedLineChart>
-                                </chart:Chart>
-                            </VBox>
                         </l:SplitPane>
                     </l:PaneContainer>
                 </l:PaneContainer>

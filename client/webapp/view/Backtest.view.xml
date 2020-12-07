@@ -1,20 +1,19 @@
-<mvc:View controllerName="fokind.bot.controller.IdealBacktestCreate"
+<mvc:View controllerName="fokind.bot.controller.Backtest"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:core="sap.ui.core"
     xmlns:l="sap.ui.layout"
     xmlns:form="sap.ui.layout.form"
-    xmlns:codeeditor="sap.ui.codeeditor"
     xmlns="sap.m" displayBlock="true">
-    <Page title="Create Ideal Backtest" enableScrolling="false" showNavButton="true" navButtonPress="onBackPress" showHeader="true">
+    <Page title="Backtest" enableScrolling="false" showNavButton="true" navButtonPress="onBackPress" showHeader="true" binding="{/}">
         <headerContent>
-            <Button icon="sap-icon://media-play" text="Run" press="onRunPress"/>
+            <Button icon="sap-icon://copy" text="Clone" press="onClonePress"/>
         </headerContent>
         <content>
             <l:ResponsiveSplitter>
                 <l:PaneContainer>
-                    <l:PaneContainer orientation="Horizontal">
+                    <l:PaneContainer orientation="Vertical">
                         <l:SplitPane>
-                            <form:Form editable="true">
+                            <form:Form editable="false">
                                 <form:layout>
                                     <form:ResponsiveGridLayout labelSpanXL="2" labelSpanL="2" labelSpanM="3" labelSpanS="6" adjustLabelSpan="false" emptySpanXL="0" emptySpanL="0" emptySpanM="0" emptySpanS="0" columnsXL="12" columnsL="6" columnsM="4"/>
                                 </form:layout>
@@ -22,60 +21,67 @@
                                     <form:FormContainer>
                                         <form:formElements>
                                             <form:FormElement label="Exchange">
-                                                <Input value="{exchange}">
+                                                <Text text="{exchange}">
                                                     <layoutData>
                                                         <l:GridData span="XL2 L2 M3 S6"/>
                                                     </layoutData>
-                                                </Input>
+                                                </Text>
                                             </form:FormElement>
                                             <form:FormElement label="Currency">
-                                                <Input value="{currency}">
+                                                <Text text="{currency}">
                                                     <layoutData>
                                                         <l:GridData span="XL2 L2 M3 S6"/>
                                                     </layoutData>
-                                                </Input>
+                                                </Text>
                                             </form:FormElement>
                                             <form:FormElement label="Asset">
-                                                <Input value="{asset}">
+                                                <Text text="{asset}">
                                                     <layoutData>
                                                         <l:GridData span="XL2 L2 M3 S6"/>
                                                     </layoutData>
-                                                </Input>
+                                                </Text>
                                             </form:FormElement>
                                             <form:FormElement label="Period">
-                                                <Input value="{period}">
+                                                <Text text="{period}">
                                                     <layoutData>
                                                         <l:GridData span="XL2 L2 M3 S6"/>
                                                     </layoutData>
-                                                </Input>
+                                                </Text>
                                             </form:FormElement>
                                             <form:FormElement label="Begin">
-                                                <DatePicker id="begin" displayFormat="short" valueFormat="yyyy-MM-dd" value="{/begin}">
+                                                <Text text="{begin}">
                                                     <layoutData>
                                                         <l:GridData span="XL2 L2 M3 S6"/>
                                                     </layoutData>
-                                                </DatePicker>
+                                                </Text>
                                             </form:FormElement>
                                             <form:FormElement label="End">
-                                                <DatePicker id="end" displayFormat="short" valueFormat="yyyy-MM-dd" value="{/end}">
+                                                <Text text="{end}">
                                                     <layoutData>
                                                         <l:GridData span="XL2 L2 M3 S6"/>
                                                     </layoutData>
-                                                </DatePicker>
+                                                </Text>
                                             </form:FormElement>
                                             <form:FormElement label="Fee">
-                                                <Input value="{fee}">
+                                                <Text text="{fee}">
                                                     <layoutData>
                                                         <l:GridData span="XL2 L2 M3 S6"/>
                                                     </layoutData>
-                                                </Input>
+                                                </Text>
                                             </form:FormElement>
                                             <form:FormElement label="Initial Balance">
-                                                <Input value="{initialBalance}">
+                                                <Text text="{initialBalance}">
                                                     <layoutData>
                                                         <l:GridData span="XL2 L2 M3 S6"/>
                                                     </layoutData>
-                                                </Input>
+                                                </Text>
+                                            </form:FormElement>
+                                            <form:FormElement label="Final Balance">
+                                                <Text text="{finalBalance}">
+                                                    <layoutData>
+                                                        <l:GridData span="XL2 L2 M3 S6"/>
+                                                    </layoutData>
+                                                </Text>
                                             </form:FormElement>
                                         </form:formElements>
                                     </form:FormContainer>

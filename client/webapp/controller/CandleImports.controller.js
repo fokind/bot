@@ -14,14 +14,21 @@ sap.ui.define(
                     .getRoute("candleImports")
                     .attachMatched(this._onRouteMatched, this);
 
-                this.getView().addStyleClass(
+                var oView = this.getView();
+
+                oView.addStyleClass(
                     this.getOwnerComponent().getContentDensityClass()
                 );
+
+                oView.setModel(new JSONModel());
             },
 
             _onRouteMatched: function () {
-                var oView = this.getView();
-                oView.setModel(oView.getModel("data"));
+                var oModel = this.getView().getModel();
+
+                oModel.loadData("/api/candleImports").then(function () {
+                    console.log(oModel);
+                });
             },
 
             _getCandleImportDialogPromise: function () {
@@ -62,23 +69,23 @@ sap.ui.define(
             onOkPress: function () {
                 this._getCandleImportDialogPromise().then(
                     function (oDialog) {
-                        var oModel = oDialog.getModel();
+                        // var oModel = oDialog.getModel();
                         oDialog.close();
-                        var oTable = this.byId("candleImportsTable");
-                        oTable
-                            .getBinding("rows")
-                            .create({
-                                exchange: oModel.getProperty("/exchange"),
-                                currency: oModel.getProperty("/currency"),
-                                asset: oModel.getProperty("/asset"),
-                                period: +oModel.getProperty("/period"),
-                                begin: oModel.getProperty("/begin"),
-                                end: oModel.getProperty("/end"),
-                            })
-                            .created()
-                            .then(function () {
-                                oTable.getBindingContext("data").refresh();
-                            });
+                        // var oTable = this.byId("candleImportsTable");
+                        // oTable
+                        //     .getBinding("rows")
+                        //     .create({
+                        //         exchange: oModel.getProperty("/exchange"),
+                        //         currency: oModel.getProperty("/currency"),
+                        //         asset: oModel.getProperty("/asset"),
+                        //         period: +oModel.getProperty("/period"),
+                        //         begin: oModel.getProperty("/begin"),
+                        //         end: oModel.getProperty("/end"),
+                        //     })
+                        //     .created()
+                        //     .then(function () {
+                        //         oTable.getBindingContext("data").refresh();
+                        //     });
                     }.bind(this)
                 );
             },

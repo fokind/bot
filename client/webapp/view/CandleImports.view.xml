@@ -2,21 +2,19 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.ui.table"
     xmlns:m="sap.m">
-    <m:Page title="Candle Imports"
-        showNavButton="true"
-        navButtonPress="onBackPress"
-        showHeader="true">
+    <m:Page title="Candle Imports" showNavButton="true" navButtonPress="onBackPress" showHeader="true">
         <m:headerContent>
             <m:Button icon="sap-icon://add" text="Add" press="onAddPress"/>
         </m:headerContent>
         <m:content>
-            <Table id="candleImportsTable"
-                rows="{/CandleImports}"
-                title="Candle Imports"
-                selectionMode="Single"
-                selectionBehavior="RowOnly"
-                visibleRowCountMode="Auto">
+            <Table rows="{/}" title="Candle Imports" selectionMode="Single" selectionBehavior="RowOnly" visibleRowCountMode="Auto">
                 <columns>
+					<Column>
+						<m:Label text="id" />
+						<template>
+							<m:Text text="{_id}" wrapping="false"/>
+						</template>
+					</Column>
                     <Column>
                         <m:Label text="Currency" />
                         <template>

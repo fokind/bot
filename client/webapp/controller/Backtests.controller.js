@@ -1,6 +1,6 @@
 sap.ui.define(
-    ["sap/ui/core/mvc/Controller", "sap/ui/core/UIComponent"],
-    function (Controller) {
+    ["sap/ui/core/mvc/Controller", "sap/ui/model/json/JSONModel"],
+    function (Controller, JSONModel) {
         "use strict";
 
         return Controller.extend("fokind.bot.controller.Backtests", {
@@ -10,18 +10,25 @@ sap.ui.define(
                     .getRoute("backtests")
                     .attachMatched(this._onRouteMatched, this);
 
-                this.getView().addStyleClass(
+                var oView = this.getView();
+
+                oView.addStyleClass(
                     this.getOwnerComponent().getContentDensityClass()
                 );
+
+                oView.setModel(new JSONModel());
             },
 
             _onRouteMatched: function () {
-                var oView = this.getView();
-                oView.setModel(oView.getModel("data"));
+                var oModel = this.getView().getModel();
+
+                oModel.loadData("/api/backtests").then(function () {
+                    console.log(oModel);
+                });
             },
 
             onAddPress: function () {
-                this.getOwnerComponent().getRouter().navTo("backtestCreate");
+                // this.getOwnerComponent().getRouter().navTo("backtestCreate");
             },
 
             onRowSelectionChange: function (oEvent) {

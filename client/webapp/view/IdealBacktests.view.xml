@@ -1,19 +1,13 @@
-<mvc:View controllerName="fokind.bot.controller.Backtests"
+<mvc:View controllerName="fokind.bot.controller.IdealBacktests"
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns="sap.ui.table"
 	xmlns:m="sap.m">
-	<m:Page title="Backtests" showNavButton="true" navButtonPress="onBackPress">
-        <m:headerContent>
-            <m:Button icon="sap-icon://add" text="Add" press="onAddPress"/>
-        </m:headerContent>
+	<m:Page title="Ideal Backtests" showNavButton="true" navButtonPress="onBackPress">
+		<m:headerContent>
+			<m:Button icon="sap-icon://add" text="Add" press="onAddPress"/>
+		</m:headerContent>
 		<m:content>
-			<Table id="backtests"
-				rows="{/Backtests}"
-				title="Backtest"
-				selectionMode="Single"
-				selectionBehavior="RowOnly"
-				visibleRowCountMode="Auto"
-				rowSelectionChange="onRowSelectionChange">
+			<Table rows="{/}" title="Ideal Backtests" selectionMode="Single" selectionBehavior="RowOnly" visibleRowCountMode="Auto" rowSelectionChange="onRowSelectionChange">
 				<columns>
 					<Column>
 						<m:Label text="Currency" />
@@ -43,18 +37,6 @@
 						<m:Label text="End" />
 						<template>
 							<m:Text text="{end}" wrapping="false"/>
-						</template>
-					</Column>
-					<Column>
-						<m:Label text="Strategy" />
-						<template>
-							<m:Text text="{strategyName}" wrapping="false"/>
-						</template>
-					</Column>
-					<Column>
-						<m:Label text="Stoploss" />
-						<template>
-							<m:Text text="{stoplossLevel}" wrapping="false"/>
 						</template>
 					</Column>
 					<Column>

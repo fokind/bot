@@ -2,49 +2,42 @@
     "sap.app": {
         "id": "fokind.bot",
         "type": "application",
+        "title": "Bot",
+        "description": "Bot",
         "applicationVersion": {
             "version": "1.0.0"
-        },
-        "dataSources": {
-            "default": {
-                "uri": "/odata/",
-                "type": "OData",
-                "settings": {
-                    "odataVersion": "4.0"
-                }
-            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
         }
     },
     "sap.ui5": {
+        "rootView": {
+            "viewName": "fokind.bot.view.App",
+            "type": "XML",
+            "async": true,
+            "id": "app"
+        },
         "dependencies": {
+            "minUI5Version": "1.71",
             "libs": {
                 "sap.m": {},
                 "sap.ui.core": {},
                 "openui5.financial.chart": {}
             }
         },
-        "models": {
-            "data": {
-                "dataSource": "default",
-                "settings": {
-                    "autoExpandSelect": false,
-                    "groupId": "$direct",
-                    "synchronizationMode": "None",
-                    "operationMode": "Server"
-                }
-            }
-        },
-        "rootView": {
-            "viewName": "fokind.bot.view.App",
-            "type": "XML"
-        },
         "routing": {
             "config": {
                 "routerClass": "sap.m.routing.Router",
-                "controlId": "app",
                 "viewType": "XML",
-                "controlAggregation": "pages",
                 "viewPath": "fokind.bot.view",
+                "controlId": "app",
+                "controlAggregation": "pages",
                 "async": true
             },
             "routes": [
@@ -69,11 +62,6 @@
                     "target": "idealBacktest"
                 },
                 {
-                    "pattern": "idealBacktestCreate/:cloneId:",
-                    "name": "idealBacktestCreate",
-                    "target": "idealBacktestCreate"
-                },
-                {
                     "pattern": "backtests",
                     "name": "backtests",
                     "target": "backtests"
@@ -82,11 +70,6 @@
                     "pattern": "backtest/{id}",
                     "name": "backtest",
                     "target": "backtest"
-                },
-                {
-                    "pattern": "backtestCreate/:cloneId:",
-                    "name": "backtestCreate",
-                    "target": "backtestCreate"
                 }
             ],
             "targets": {
@@ -106,10 +89,6 @@
                     "viewName": "IdealBacktest",
                     "viewLevel": 2
                 },
-                "idealBacktestCreate": {
-                    "viewName": "IdealBacktestCreate",
-                    "viewLevel": 3
-                },
                 "backtests": {
                     "viewName": "Backtests",
                     "viewLevel": 1
@@ -117,10 +96,6 @@
                 "backtest": {
                     "viewName": "Backtest",
                     "viewLevel": 2
-                },
-                "backtestCreate": {
-                    "viewName": "BacktestCreate",
-                    "viewLevel": 3
                 }
             }
         }
