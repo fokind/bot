@@ -23,6 +23,9 @@
             "async": true,
             "id": "app"
         },
+        "resourceRoots": {
+            "openui5.financial.chart": "resources/openui5/financial/chart"
+        },
         "dependencies": {
             "minUI5Version": "1.71",
             "libs": {

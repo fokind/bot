@@ -17,18 +17,30 @@ sap.ui.define(
                 );
 
                 oView.setModel(new JSONModel());
+                oView.setModel(new JSONModel(), "candles");
             },
 
             _onRouteMatched: function (oEvent) {
-                var oModel = this.getView().getModel()
                 var sBacktestId = oEvent.getParameter("arguments").id;
-                this._getDataPromise(sBacktestId).then(function() {
-                    console.log(oModel);
-                });
+                this._getDataPromise(sBacktestId).then(
+                    function () {
+                        var oView = this.getView();
+                        console.log(oView.getModel());
+                        console.log(oView.getModel("candles"));
+
+                        this.byId("candlestickChart").refresh();
+                    }.bind(this)
+                );
             },
 
             _getDataPromise: function (sBacktestId) {
-                return this.getView().getModel().loadData("/api/backtests/" + sBacktestId);
+                var oView = this.getView();
+                var sBaseUrl = "/api/backtests/" + sBacktestId;
+
+                return Promise.all([
+                    oView.getModel().loadData(sBaseUrl),
+                    oView.getModel("candles").loadData(sBaseUrl + "/candles"),
+                ]);
             },
 
             onClonePress: function () {
