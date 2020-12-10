@@ -1,5 +1,6 @@
 import * as dotenv from "dotenv";
 import * as express from "express";
+import * as bodyParser from "body-parser";
 import { join } from "path";
 import backtests from "./routes/backtests";
 import candleImports from "./routes/candleImports";
@@ -10,6 +11,8 @@ const port = process.env.PORT || 3000;
 
 const app = express();
 const api = express();
+
+const jsonParser = bodyParser.json();
 
 app.use("/", express.static(join(__dirname, "../client/webapp/")));
 
@@ -35,7 +38,7 @@ app.use(
 );
 //
 
-api.use("/backtests", backtests);
+api.use("/backtests", jsonParser, backtests);
 api.use("/candleImports", candleImports);
 api.use("/idealBacktests", idealBacktests);
 

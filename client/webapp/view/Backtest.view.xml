@@ -4,6 +4,7 @@
     xmlns:l="sap.ui.layout"
     xmlns:form="sap.ui.layout.form"
     xmlns:chart="openui5.financial.chart"
+    xmlns:indicator="openui5.financial.chart.indicator"
     xmlns="sap.m" displayBlock="true">
     <Page title="Backtest" enableScrolling="false" showNavButton="true" navButtonPress="onBackPress" showHeader="true">
         <headerContent>
@@ -93,10 +94,20 @@
                     <l:PaneContainer>
                         <l:SplitPane>
                             <VBox>
-                                <chart:Chart id="candlestickChart" height="240px" padding="5 20 25 60" start="{/begin}" end="{/end}" period="{/period}">
+                                <Toolbar>
+                                    <Input value="{view>/begin}"/>
+                                    <Input value="{view>/end}"/>
+                                    <Button icon="sap-icon://refresh" press="onPress"/>
+                                </Toolbar>
+                                <chart:Chart id="candlestickChart" height="240px" padding="5 20 25 60" start="{view>/begin}" end="{view>/end}" period="{/period}">
                                     <chart:CandlestickChart items="{candles>/}">
                                         <chart:Candle time="{candles>time}" open="{candles>open}" high="{candles>high}" low="{candles>low}" close="{candles>close}"/>
                                     </chart:CandlestickChart>
+                                </chart:Chart>
+                                <chart:Chart id="cciozChart" height="90px" padding="5 20 25 60" start="{view>/begin}" end="{view>/end}" period="{/period}">
+                                    <indicator:CCIOZ items="{/indicatorOutputs/cci}" overboughtZone="100" oversoldZone="-100">
+                                        <chart:LineChartItem time="{time}" value="{values/0}"/>
+                                    </indicator:CCIOZ>
                                 </chart:Chart>
                             </VBox>
                         </l:SplitPane>

@@ -16,6 +16,13 @@ sap.ui.define(
                     this.getOwnerComponent().getContentDensityClass()
                 );
 
+                oView.setModel(
+                    new JSONModel({
+                        begin: "",
+                        end: "",
+                    }),
+                    "view"
+                );
                 oView.setModel(new JSONModel());
                 oView.setModel(new JSONModel(), "candles");
             },
@@ -25,10 +32,18 @@ sap.ui.define(
                 this._getDataPromise(sBacktestId).then(
                     function () {
                         var oView = this.getView();
-                        console.log(oView.getModel());
+                        var oModel = oView.getModel();
+
+                        console.log(oModel);
                         console.log(oView.getModel("candles"));
 
+                        oView.getModel("view").setData({
+                            begin: oModel.getProperty("/begin"),
+                            end: oModel.getProperty("/end"),
+                        });
+
                         this.byId("candlestickChart").refresh();
+                        this.byId("cciozChart").refresh();
                     }.bind(this)
                 );
             },
@@ -51,6 +66,11 @@ sap.ui.define(
                 //             .getBindingContext()
                 //             .getProperty("_id"),
                 //     });
+            },
+
+            onPress: function () {
+                this.byId("candlestickChart").refresh();
+                this.byId("cciozChart").refresh();
             },
 
             onBackPress: function () {

@@ -1,7 +1,10 @@
 import { ObjectID } from "mongodb";
+import { IIndicatorInput } from "./IIndicatorInput";
+import { IIndicatorOutput } from "./IIndicatorOutput";
+import { IRoundtrip } from "./IRoundtrip";
 
 export interface IBacktest {
-    _id?: ObjectID;
+    _id?: string | ObjectID;
     exchange: string;
     currency: string;
     asset: string;
@@ -9,11 +12,11 @@ export interface IBacktest {
     begin: string;
     end: string;
     strategyName: string;
-    strategyWarmup: number;
     strategyCode: string;
-    strategyIndicatorInputs: string;
+    indicatorInputs?: Record<string, IIndicatorInput>;
     stoplossLevel: number;
     fee: number;
+    trailingStop: boolean;
     initialBalance: number;
     finalBalance?: number;
     maxDrawDown?: number;
@@ -23,4 +26,6 @@ export interface IBacktest {
     winningTradesPercentage?: number;
     losingTradesPercentage?: number;
     maxLosingSeriesLength?: number;
+    roundtrips?: IRoundtrip;
+    indicatorOutputs?: Record<string, IIndicatorOutput[]>;
 }
