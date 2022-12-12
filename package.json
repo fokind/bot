@@ -39,7 +39,7 @@
     "dotenv": "^8.1.0",
     "event-stream": "^4.0.1",
     "exchange-service": "^1.0.5-alpha",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-ws": "^4.0.0",
     "moment": "^2.24.0",
     "mongodb": "^3.3.2",
